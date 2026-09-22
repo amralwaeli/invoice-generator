@@ -112,6 +112,65 @@ function nextFrame(): Promise<void> {
   });
 }
 
+function buildPdfCaptureClone(element: HTMLElement): HTMLElement {
+  const clone = element.cloneNode(true) as HTMLElement;
+  clone.removeAttribute('class');
+  clone.style.all = 'unset';
+  clone.style.display = 'block';
+  clone.style.width = `${element.scrollWidth}px`;
+  clone.style.maxWidth = '100%';
+  clone.style.backgroundColor = '#ffffff';
+  clone.style.color = '#0f172a';
+  clone.style.boxShadow = 'none';
+  clone.style.border = 'none';
+  clone.style.margin = '0';
+  clone.style.padding = '0';
+
+  const nodes = Array.from(clone.querySelectorAll('*')) as HTMLElement[];
+  nodes.push(clone);
+
+  for (const node of nodes) {
+    if (node === clone) {
+      node.removeAttribute('class');
+      continue;
+    }
+
+    node.removeAttribute('class');
+    const computed = window.getComputedStyle(node);
+    const style = node.style;
+
+    style.color = computed.color;
+    style.backgroundColor = computed.backgroundColor === 'rgba(0, 0, 0, 0)' ? 'transparent' : computed.backgroundColor;
+    style.borderColor = computed.borderColor;
+    style.borderStyle = computed.borderStyle;
+    style.borderWidth = computed.borderWidth;
+    style.fontFamily = computed.fontFamily;
+    style.fontSize = computed.fontSize;
+    style.fontWeight = computed.fontWeight;
+    style.lineHeight = computed.lineHeight;
+    style.letterSpacing = computed.letterSpacing;
+    style.textAlign = computed.textAlign;
+    style.display = computed.display;
+    style.justifyContent = computed.justifyContent;
+    style.alignItems = computed.alignItems;
+    style.gap = computed.gap;
+    style.padding = computed.padding;
+    style.margin = computed.margin;
+    style.width = computed.width;
+    style.height = computed.height;
+    style.maxWidth = computed.maxWidth;
+    style.minHeight = computed.minHeight;
+    style.boxShadow = 'none';
+  }
+
+  clone.style.position = 'static';
+  clone.style.visibility = 'visible';
+  clone.setAttribute('data-pdf-export-clone', 'true');
+
+  document.body.appendChild(clone);
+  return clone;
+}
+
 function waitForImage(image: HTMLImageElement, timeoutMs = 4000): Promise<void> {
   if (image.complete) {
     return image.decode ? image.decode().catch(() => undefined) : Promise.resolve();
@@ -240,22 +299,24 @@ export async function generateInvoicePDF(
 
   const endExport = beginExport(element);
   let canvas: HTMLCanvasElement | null = null;
+  let captureClone: HTMLElement | null = null;
 
   try {
     reportProgress(options, 'Preparing document...');
     await waitForStableLayout(element);
 
-    const safeBreakOffsets = collectSafeBreakOffsets(element);
+    captureClone = buildPdfCaptureClone(element);
+    const safeBreakOffsets = collectSafeBreakOffsets(captureClone);
     reportProgress(options, 'Rendering high-resolution document...');
 
-    canvas = await html2canvas(element, {
+    canvas = await html2canvas(captureClone, {
       scale: 2,
       useCORS: true,
       allowTaint: false,
       logging: false,
       backgroundColor: '#ffffff',
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight,
+      windowWidth: captureClone.scrollWidth,
+      windowHeight: captureClone.scrollHeight,
       scrollX: 0,
       scrollY: 0,
     });
@@ -313,6 +374,9 @@ export async function generateInvoicePDF(
     if (canvas) {
       canvas.width = 1;
       canvas.height = 1;
+    }
+    if (captureClone && captureClone.parentNode) {
+      captureClone.parentNode.removeChild(captureClone);
     }
     endExport();
   }
