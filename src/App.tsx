@@ -97,7 +97,7 @@ function createBlankInvoice(): SimpleInvoiceData {
     status: 'draft',
     customerName: '',
     customerPhone: '',
-    items: [createLineItem()],
+    items: [],
     discountType: 'fixed',
     discountValue: 0,
     taxType: 'percentage',
@@ -159,6 +159,8 @@ function normalizeInvoice(value: unknown): SimpleInvoiceData {
     shopName: defaults.shopName,
     companyReg: defaults.companyReg,
     shopAddress: defaults.shopAddress,
+    shopEmail: readString(value.shopEmail, defaults.shopEmail),
+    shopPhone: readString(value.shopPhone, defaults.shopPhone),
     bankName: defaults.bankName,
     accountName: defaults.accountName,
     accountNumber: defaults.accountNumber,
@@ -168,9 +170,15 @@ function normalizeInvoice(value: unknown): SimpleInvoiceData {
 function loadDraft(): SimpleInvoiceData {
   try {
     const saved = localStorage.getItem(DRAFT_STORAGE_KEY) || localStorage.getItem('yaman_mart_invoice');
-    return saved ? normalizeInvoice(JSON.parse(saved)) : cloneDefaultInvoice();
+    if (!saved) return createBlankInvoice();
+
+    const parsed = JSON.parse(saved);
+    const normalized = normalizeInvoice(parsed);
+    return normalized.items.length === 0 || normalized.customerName === ''
+      ? normalized
+      : createBlankInvoice();
   } catch {
-    return cloneDefaultInvoice();
+    return createBlankInvoice();
   }
 }
 
@@ -383,7 +391,7 @@ export default function App() {
   const removeItem = (id: string) => {
     setInvoice((current) => {
       if (current.items.length === 1) {
-        return { ...current, items: [createLineItem()] };
+        return { ...current, items: [] };
       }
       return {
         ...current,
@@ -656,26 +664,6 @@ export default function App() {
               </label>
             </div>
 
-            <div className="mt-4">
-              <span className={labelClass}>Payment status</span>
-              <div className="grid grid-cols-3 rounded-lg bg-slate-100 p-1">
-                {(['draft', 'sent', 'paid'] as const).map((status) => (
-                  <button
-                    key={status}
-                    type="button"
-                    onClick={() => updateInvoice({ status })}
-                    className={
-                      'rounded-md px-2 py-2 text-[11px] font-bold capitalize transition ' +
-                      (invoice.status === status
-                        ? 'bg-white text-emerald-800 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-800')
-                    }
-                  >
-                    {status === 'sent' ? 'Sent' : status}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -942,62 +930,70 @@ export default function App() {
               className="invoice-document mx-auto min-h-[1120px] w-full max-w-[794px] bg-white p-4 text-slate-800 shadow-xl shadow-slate-300/40 ring-1 ring-slate-200 sm:p-8 md:p-12"
             >
               <div className="flex min-h-[1024px] flex-col">
-                <div>
-                  <div className="flex items-start justify-between gap-8 border-b-2 border-slate-900 pb-8">
-                    <div className="flex max-w-[440px] items-start gap-4">
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-emerald-700 text-white">
-                        <Store className="h-7 w-7" />
-                      </div>
-                      <div>
-                        <p className="text-xl font-black tracking-tight text-slate-950">{invoice.shopName}</p>
-                        {invoice.companyReg && (
-                          <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-800">
-                            Registration no. {invoice.companyReg}
-                          </p>
-                        )}
-                        <p className="mt-2 text-[11px] font-medium leading-relaxed text-slate-500">{invoice.shopAddress}</p>
-                      </div>
-                    </div>
+                <div className="mb-6 overflow-hidden rounded-xl border border-slate-200 bg-white">
+                  <img
+                    src={invoice.logoUrl || '/yaman_mart_banner.jpg'}
+                    alt="Store logo"
+                    className="h-28 w-full object-cover bg-slate-100"
+                  />
+                </div>
 
-                    <div className="min-w-[180px] text-right">
-                      <span className={'inline-flex rounded-full border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.13em] ' + displayStatusInfo.className}>
-                        {displayStatusInfo.label}
-                      </span>
-                      <h2 className="mt-4 text-4xl font-black tracking-[-0.04em] text-slate-950">INVOICE</h2>
-                      <p className="mt-1 font-mono text-sm font-bold text-emerald-800">{invoice.invoiceNumber || '—'}</p>
-                    </div>
+                <div className="flex items-start justify-between gap-8 border-b-2 border-slate-900 pb-8">
+                  <div className="max-w-[440px]">
+                    <p className="text-xl font-black tracking-tight text-slate-950">{invoice.shopName}</p>
+                    {invoice.companyReg && (
+                      <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-800">
+                        Registration no. {invoice.companyReg}
+                      </p>
+                    )}
+                    <p className="mt-2 text-[11px] font-medium leading-relaxed text-slate-500">{invoice.shopAddress}</p>
+                    <p className="mt-2 text-[11px] font-medium text-slate-500">{invoice.shopEmail}</p>
+                    <p className="text-[11px] font-medium text-slate-500">{invoice.shopPhone}</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-12 py-8">
-                    <div>
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-slate-400">Bill to</p>
-                      <p className="mt-3 text-base font-bold text-slate-900">{invoice.customerName.trim() || 'Walk-in customer'}</p>
-                      {invoice.customerPhone && <p className="mt-1 text-xs text-slate-500">{invoice.customerPhone}</p>}
-                    </div>
-                    <dl className="space-y-2 text-right text-xs">
-                      <div className="flex items-center justify-between gap-6">
-                        <dt className="font-semibold uppercase tracking-wider text-slate-400">Issue date</dt>
-                        <dd className="font-bold text-slate-800">{formatDate(invoice.date)}</dd>
-                      </div>
-                      <div className="flex items-center justify-between gap-6">
-                        <dt className="font-semibold uppercase tracking-wider text-slate-400">Due date</dt>
-                        <dd className="font-bold text-slate-800">{formatDate(invoice.dueDate)}</dd>
-                      </div>
-                    </dl>
+                  <div className="min-w-[180px] text-right">
+                    <h2 className="text-4xl font-black tracking-[-0.04em] text-slate-950">INVOICE</h2>
+                    <p className="mt-1 font-mono text-sm font-bold text-emerald-800">{invoice.invoiceNumber || '—'}</p>
                   </div>
+                </div>
 
-                  <table className="w-full border-collapse text-left">
-                    <thead>
-                      <tr className="bg-slate-950 text-[10px] font-extrabold uppercase tracking-[0.13em] text-white">
-                        <th className="w-12 rounded-l-lg px-3 py-3 text-center">#</th>
-                        <th className="px-3 py-3">Description</th>
-                        <th className="w-20 px-3 py-3 text-center">Qty</th>
-                        <th className="w-28 px-3 py-3 text-right">Rate</th>
-                        <th className="w-32 rounded-r-lg px-3 py-3 text-right">Amount</th>
+                <div className="grid grid-cols-2 gap-12 py-8">
+                  <div>
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-slate-400">Bill to</p>
+                    <p className="mt-3 text-base font-bold text-slate-900">{invoice.customerName.trim() || 'Walk-in customer'}</p>
+                    {invoice.customerPhone && <p className="mt-1 text-xs text-slate-500">{invoice.customerPhone}</p>}
+                  </div>
+                  <dl className="space-y-2 text-right text-xs">
+                    <div className="flex items-center justify-between gap-6">
+                      <dt className="font-semibold uppercase tracking-wider text-slate-400">Issue date</dt>
+                      <dd className="font-bold text-slate-800">{formatDate(invoice.date)}</dd>
+                    </div>
+                    <div className="flex items-center justify-between gap-6">
+                      <dt className="font-semibold uppercase tracking-wider text-slate-400">Due date</dt>
+                      <dd className="font-bold text-slate-800">{formatDate(invoice.dueDate)}</dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <table className="w-full border-collapse text-left">
+                  <thead>
+                    <tr className="bg-slate-950 text-[10px] font-extrabold uppercase tracking-[0.13em] text-white">
+                      <th className="w-12 rounded-l-lg px-3 py-3 text-center">#</th>
+                      <th className="px-3 py-3">Description</th>
+                      <th className="w-20 px-3 py-3 text-center">Qty</th>
+                      <th className="w-28 px-3 py-3 text-right">Rate</th>
+                      <th className="w-32 rounded-r-lg px-3 py-3 text-right">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {invoice.items.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-3 py-8 text-center text-sm text-slate-500">
+                          No items added yet. Add each item one by one.
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {invoice.items.map((item, index) => {
+                    ) : (
+                      invoice.items.map((item, index) => {
                         const lineTotal = numericValue(item.quantity) * numericValue(item.unitPrice);
                         return (
                           <tr key={item.id} className={index % 2 === 1 ? 'bg-slate-50/70' : ''}>
@@ -1016,60 +1012,60 @@ export default function App() {
                             </td>
                           </tr>
                         );
-                      })}
-                    </tbody>
-                  </table>
+                      })
+                    )}
+                  </tbody>
+                </table>
 
-                  <div className="mt-8 grid grid-cols-[1fr_260px] gap-10">
-                    <div className="space-y-5">
-                      <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4">
-                        <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-amber-800">Payment details</p>
-                        <div className="mt-3 grid grid-cols-[100px_1fr] gap-y-1.5 text-xs">
-                          <span className="font-medium text-slate-500">Bank</span>
-                          <span className="font-bold text-slate-800">{invoice.bankName}</span>
-                          <span className="font-medium text-slate-500">Account name</span>
-                          <span className="font-bold text-slate-800">{invoice.accountName}</span>
-                          <span className="font-medium text-slate-500">Account no.</span>
-                          <span className="font-mono font-extrabold tracking-wide text-slate-900">{invoice.accountNumber}</span>
-                        </div>
-                        <p className="mt-3 border-t border-amber-200/80 pt-3 text-[10px] leading-relaxed text-amber-900/80">{invoice.notes}</p>
+                <div className="mt-8 grid grid-cols-[1fr_260px] gap-10">
+                  <div className="space-y-5">
+                    <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-amber-800">Payment details</p>
+                      <div className="mt-3 grid grid-cols-[100px_1fr] gap-y-1.5 text-xs">
+                        <span className="font-medium text-slate-500">Bank</span>
+                        <span className="font-bold text-slate-800">{invoice.bankName}</span>
+                        <span className="font-medium text-slate-500">Account name</span>
+                        <span className="font-bold text-slate-800">{invoice.accountName}</span>
+                        <span className="font-medium text-slate-500">Account no.</span>
+                        <span className="font-mono font-extrabold tracking-wide text-slate-900">{invoice.accountNumber}</span>
                       </div>
-
-                      {invoice.remarks.trim() && (
-                        <div>
-                          <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400">Remarks</p>
-                          <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-slate-600">{invoice.remarks}</p>
-                        </div>
-                      )}
+                      <p className="mt-3 border-t border-amber-200/80 pt-3 text-[10px] leading-relaxed text-amber-900/80">{invoice.notes}</p>
                     </div>
 
-                    <div className="self-start rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs">
-                      <div className="flex justify-between gap-4 py-1.5 text-slate-600">
-                        <span>Items ({totals.quantity})</span>
-                        <span className="font-mono font-semibold">{formatMoney(totals.subtotal, invoice.currencySymbol)}</span>
+                    {invoice.remarks.trim() && (
+                      <div>
+                        <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400">Remarks</p>
+                        <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-slate-600">{invoice.remarks}</p>
                       </div>
-                      <div className="flex justify-between gap-4 py-1.5 text-slate-600">
-                        <span>
-                          Discount
-                          {numericValue(invoice.discountValue) > 0 && invoice.discountType === 'percentage'
-                            ? ' (' + numericValue(invoice.discountValue) + '%)'
-                            : ''}
-                        </span>
-                        <span className="font-mono font-semibold text-emerald-800">− {formatMoney(totals.discountAmount, invoice.currencySymbol)}</span>
-                      </div>
-                      <div className="flex justify-between gap-4 border-b border-slate-200 py-1.5 text-slate-600">
-                        <span>
-                          {invoice.taxName.trim() || 'Tax'}
-                          {numericValue(invoice.taxRate) > 0 && invoice.taxType === 'percentage'
-                            ? ' (' + numericValue(invoice.taxRate) + '%)'
-                            : ''}
-                        </span>
-                        <span className="font-mono font-semibold">+ {formatMoney(totals.taxAmount, invoice.currencySymbol)}</span>
-                      </div>
-                      <div className="mt-3 flex justify-between gap-4 border-t-2 border-slate-900 pt-3">
-                        <span className="font-extrabold uppercase tracking-wide text-slate-900">Total due</span>
-                        <span className="font-mono text-base font-black text-emerald-800">{formatMoney(totals.total, invoice.currencySymbol)}</span>
-                      </div>
+                    )}
+                  </div>
+
+                  <div className="self-start rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs">
+                    <div className="flex justify-between gap-4 py-1.5 text-slate-600">
+                      <span>Items ({totals.quantity})</span>
+                      <span className="font-mono font-semibold">{formatMoney(totals.subtotal, invoice.currencySymbol)}</span>
+                    </div>
+                    <div className="flex justify-between gap-4 py-1.5 text-slate-600">
+                      <span>
+                        Discount
+                        {numericValue(invoice.discountValue) > 0 && invoice.discountType === 'percentage'
+                          ? ' (' + numericValue(invoice.discountValue) + '%)'
+                          : ''}
+                      </span>
+                      <span className="font-mono font-semibold text-emerald-800">− {formatMoney(totals.discountAmount, invoice.currencySymbol)}</span>
+                    </div>
+                    <div className="flex justify-between gap-4 border-b border-slate-200 py-1.5 text-slate-600">
+                      <span>
+                        {invoice.taxName.trim() || 'Tax'}
+                        {numericValue(invoice.taxRate) > 0 && invoice.taxType === 'percentage'
+                          ? ' (' + numericValue(invoice.taxRate) + '%)'
+                          : ''}
+                      </span>
+                      <span className="font-mono font-semibold">+ {formatMoney(totals.taxAmount, invoice.currencySymbol)}</span>
+                    </div>
+                    <div className="mt-3 flex justify-between gap-4 border-t-2 border-slate-900 pt-3">
+                      <span className="font-extrabold uppercase tracking-wide text-slate-900">Total due</span>
+                      <span className="font-mono text-base font-black text-emerald-800">{formatMoney(totals.total, invoice.currencySymbol)}</span>
                     </div>
                   </div>
                 </div>
@@ -1078,6 +1074,7 @@ export default function App() {
                   <div className="border-t border-slate-200 pt-5">
                     <p className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">Thank you for your business</p>
                     <p className="mt-1 text-[10px] text-slate-400">{invoice.shopName} · {invoice.shopAddress}</p>
+                    <p className="mt-1 text-[10px] text-slate-400">{invoice.shopEmail} · {invoice.shopPhone}</p>
                   </div>
                 </footer>
               </div>
