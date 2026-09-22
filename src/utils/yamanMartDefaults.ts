@@ -55,7 +55,7 @@ export const DEFAULT_YAMAN_MART_INVOICE: SimpleInvoiceData = {
   shopAddress: 'NO. 9, JALAN DATARAN LARKIN 1, TAMAN DATARAN LARKIN, 80350, JOHOR BAHRU, JOHOR.',
   shopEmail: 'mohd123alyosfyi@gmail.com',
   shopPhone: '+6011-11500277',
-  logoUrl: '/yaman_mart_banner.jpg',
+  logoUrl: './yaman_mart_banner.jpg',
 
   items: [],
 

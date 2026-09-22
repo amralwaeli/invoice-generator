@@ -932,7 +932,7 @@ export default function App() {
               <div className="flex min-h-[1024px] flex-col">
                 <div className="mb-6 overflow-hidden rounded-xl border border-slate-200 bg-white">
                   <img
-                    src={invoice.logoUrl || '/yaman_mart_banner.jpg'}
+                    src={invoice.logoUrl || './yaman_mart_banner.jpg'}
                     alt="Store logo"
                     className="h-28 w-full object-cover bg-slate-100"
                   />
