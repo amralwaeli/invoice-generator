@@ -249,19 +249,19 @@ function statusFor(invoice: SimpleInvoiceData): DisplayStatus {
 
 const statusDetails: Record<DisplayStatus, { label: string; className: string }> = {
   draft: {
-    label: 'Draft',
+    label: 'مسودة',
     className: 'border-slate-200 bg-slate-100 text-slate-700',
   },
   sent: {
-    label: 'Payment due',
+    label: 'تستحق الدفع',
     className: 'border-amber-200 bg-amber-50 text-amber-800',
   },
   paid: {
-    label: 'Paid',
+    label: 'مدفوعة',
     className: 'border-emerald-200 bg-emerald-50 text-emerald-800',
   },
   overdue: {
-    label: 'Overdue',
+    label: 'متأخرة',
     className: 'border-rose-200 bg-rose-50 text-rose-800',
   },
 };
@@ -551,7 +551,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f7f5] text-slate-800">
+    <div dir="rtl" className="min-h-screen bg-[#f4f7f5] text-slate-800">
       <header className="no-print sticky top-0 z-40 border-b border-slate-200/90 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1480px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
@@ -564,11 +564,11 @@ export default function App() {
                   Yaman Mart
                 </h1>
                 <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800">
-                  Invoice studio
+                  استوديو الفاتورة
                 </span>
               </div>
               <p className="hidden text-[11px] font-medium text-slate-500 sm:block">
-                Professional invoices, saved privately in this browser
+                فواتير احترافية، محفوظة بشكل خاص في هذا المتصفح
               </p>
             </div>
           </div>
@@ -580,7 +580,7 @@ export default function App() {
               className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">New</span>
+              <span className="hidden sm:inline">جديد</span>
             </button>
             <button
               type="button"
@@ -588,7 +588,7 @@ export default function App() {
               className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
             >
               <FolderOpen className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Library</span>
+              <span className="hidden sm:inline">المكتبة</span>
             </button>
             <button
               type="button"
@@ -596,7 +596,7 @@ export default function App() {
               className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
             >
               <Save className="h-3.5 w-3.5" />
-              <span className="hidden md:inline">Save draft</span>
+              <span className="hidden md:inline">حفظ المسودة</span>
             </button>
             <button
               type="button"
@@ -605,7 +605,7 @@ export default function App() {
               className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isPrinting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Printer className="h-3.5 w-3.5" />}
-              <span className="hidden sm:inline">{isPrinting ? 'Preparing' : 'Print'}</span>
+              <span className="hidden sm:inline">{isPrinting ? 'جارِ التحضير' : 'طباعة'}</span>
             </button>
             <button
               type="button"
@@ -614,7 +614,7 @@ export default function App() {
               className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-emerald-400"
             >
               {isExporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-              <span>{isExporting ? exportStatus || 'Exporting' : 'Download PDF'}</span>
+              <span>{isExporting ? exportStatus || 'جارِ التصدير' : 'تحميل PDF'}</span>
             </button>
           </div>
         </div>
@@ -625,18 +625,18 @@ export default function App() {
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-700">Invoice workspace</p>
-                <h2 className="mt-1 text-lg font-extrabold tracking-tight text-slate-950">Build with confidence</h2>
+                <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-700">مساحة الفاتورة</p>
+                <h2 className="mt-1 text-lg font-extrabold tracking-tight text-slate-950">أنشئ بثقة</h2>
               </div>
               <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500">
                 <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-                Autosaved
+                حفظ تلقائي
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <label className="col-span-2">
-                <span className={labelClass}>Invoice number</span>
+                <span className={labelClass}>رقم الفاتورة</span>
                 <input
                   className={fieldClass}
                   value={invoice.invoiceNumber}
@@ -645,7 +645,7 @@ export default function App() {
                 />
               </label>
               <label>
-                <span className={labelClass}>Issue date</span>
+                <span className={labelClass}>تاريخ الإصدار</span>
                 <input
                   type="date"
                   className={fieldClass}
@@ -654,7 +654,7 @@ export default function App() {
                 />
               </label>
               <label>
-                <span className={labelClass}>Due date</span>
+                <span className={labelClass}>تاريخ الاستحقاق</span>
                 <input
                   type="date"
                   className={fieldClass}
@@ -672,22 +672,22 @@ export default function App() {
                 <FileText className="h-3.5 w-3.5" />
               </div>
               <div>
-                <h2 className="text-sm font-extrabold text-slate-900">Bill to</h2>
-                <p className="text-[11px] text-slate-500">Customer details on the final invoice</p>
+                <h2 className="text-sm font-extrabold text-slate-900">الفاتورة لصالح</h2>
+                <p className="text-[11px] text-slate-500">تفاصيل العميل على الفاتورة النهائية</p>
               </div>
             </div>
             <div className="space-y-3">
               <label>
-                <span className={labelClass}>Customer or company</span>
+                <span className={labelClass}>العميل أو الشركة</span>
                 <input
                   className={fieldClass}
                   value={invoice.customerName}
                   onChange={(event) => updateInvoice({ customerName: event.target.value })}
-                  placeholder="Customer name"
+                  placeholder="اسم العميل"
                 />
               </label>
               <label>
-                <span className={labelClass}>Phone number <span className="normal-case tracking-normal">(optional)</span></span>
+                <span className={labelClass}>رقم الهاتف <span className="normal-case tracking-normal">(اختياري)</span></span>
                 <input
                   type="tel"
                   className={fieldClass}
@@ -702,8 +702,8 @@ export default function App() {
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2 className="text-sm font-extrabold text-slate-900">Items and pricing</h2>
-                <p className="text-[11px] text-slate-500">{invoice.items.length} line {invoice.items.length === 1 ? 'item' : 'items'}</p>
+                <h2 className="text-sm font-extrabold text-slate-900">العناصر والتسعير</h2>
+                <p className="text-[11px] text-slate-500">{invoice.items.length} عنصر</p>
               </div>
               <button
                 type="button"
@@ -711,7 +711,7 @@ export default function App() {
                 className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 px-2.5 py-2 text-[11px] font-bold text-white transition hover:bg-emerald-800"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Add item
+                أضف عنصر
               </button>
             </div>
 
@@ -720,14 +720,14 @@ export default function App() {
                 <div key={item.id} className="rounded-xl border border-slate-200 bg-slate-50/70 p-3">
                   <div className="mb-2 flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                      Line {String(index + 1).padStart(2, '0')}
+                      السطر {String(index + 1).padStart(2, '0')}
                     </span>
                     <div className="flex items-center gap-1">
                       <button
                         type="button"
                         onClick={() => duplicateItem(item.id)}
                         aria-label={'Duplicate line ' + (index + 1)}
-                        title="Duplicate line"
+                        title="تكرار السطر"
                         className="rounded-md p-1.5 text-slate-400 transition hover:bg-white hover:text-emerald-700"
                       >
                         <Copy className="h-3.5 w-3.5" />
@@ -736,7 +736,7 @@ export default function App() {
                         type="button"
                         onClick={() => removeItem(item.id)}
                         aria-label={'Delete line ' + (index + 1)}
-                        title="Delete line"
+                        title="حذف السطر"
                         className="rounded-md p-1.5 text-slate-400 transition hover:bg-white hover:text-rose-700"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -748,11 +748,11 @@ export default function App() {
                     className={fieldClass}
                     value={item.description}
                     onChange={(event) => updateItem(item.id, 'description', event.target.value)}
-                    placeholder="Product or service description"
+                    placeholder="وصف المنتج أو الخدمة"
                   />
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     <label>
-                      <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">Qty</span>
+                      <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">الكمية</span>
                       <input
                         aria-label={'Quantity for line ' + (index + 1)}
                         type="number"
@@ -764,7 +764,7 @@ export default function App() {
                       />
                     </label>
                     <label>
-                      <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">Unit price</span>
+                      <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">السعر</span>
                       <input
                         aria-label={'Unit price for line ' + (index + 1)}
                         type="number"
@@ -790,14 +790,14 @@ export default function App() {
                 <MessageSquare className="h-3.5 w-3.5" />
               </div>
               <div>
-                <h2 className="text-sm font-extrabold text-slate-900">Terms and adjustments</h2>
-                <p className="text-[11px] text-slate-500">Discount, tax, and payment notes</p>
+                <h2 className="text-sm font-extrabold text-slate-900">الشروط والتعديلات</h2>
+                <p className="text-[11px] text-slate-500">الخصم، الضريبة، وملاحظات الدفع</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <label>
-                <span className={labelClass}>Discount type</span>
+                <span className={labelClass}>نوع الخصم</span>
                 <select
                   className={fieldClass}
                   value={invoice.discountType}
@@ -807,12 +807,12 @@ export default function App() {
                     })
                   }
                 >
-                  <option value="fixed">Amount (RM)</option>
-                  <option value="percentage">Percentage (%)</option>
+                  <option value="fixed">المبلغ (RM)</option>
+                  <option value="percentage">النسبة (%)</option>
                 </select>
               </label>
               <label>
-                <span className={labelClass}>Discount value</span>
+                <span className={labelClass}>قيمة الخصم</span>
                 <input
                   type="number"
                   min="0"
@@ -828,16 +828,16 @@ export default function App() {
                 />
               </label>
               <label>
-                <span className={labelClass}>Tax label</span>
+                <span className={labelClass}>اسم الضريبة</span>
                 <input
                   className={fieldClass}
                   value={invoice.taxName}
                   onChange={(event) => updateInvoice({ taxName: event.target.value })}
-                  placeholder="SST / Tax"
+                  placeholder="ضريبة / SST"
                 />
               </label>
               <label>
-                <span className={labelClass}>Tax type</span>
+                <span className={labelClass}>نوع الضريبة</span>
                 <select
                   className={fieldClass}
                   value={invoice.taxType}
@@ -847,12 +847,12 @@ export default function App() {
                     })
                   }
                 >
-                  <option value="percentage">Percentage (%)</option>
-                  <option value="fixed">Amount (RM)</option>
+                  <option value="percentage">النسبة (%)</option>
+                  <option value="fixed">المبلغ (RM)</option>
                 </select>
               </label>
               <label className="col-span-2">
-                <span className={labelClass}>Tax value</span>
+                <span className={labelClass}>قيمة الضريبة</span>
                 <div className="flex gap-2">
                   <input
                     type="number"
@@ -873,7 +873,7 @@ export default function App() {
                       onClick={() => updateInvoice({ taxRate: 6 })}
                       className="shrink-0 rounded-lg border border-emerald-200 bg-emerald-50 px-3 text-xs font-bold text-emerald-800 transition hover:bg-emerald-100"
                     >
-                      Set 6%
+                      ضبط 6%
                     </button>
                   )}
                 </div>
@@ -881,13 +881,13 @@ export default function App() {
             </div>
 
             <label className="mt-4 block">
-              <span className={labelClass}>Remarks shown on invoice</span>
+              <span className={labelClass}>ملاحظات تظهر في الفاتورة</span>
               <textarea
                 rows={3}
                 className={fieldClass + ' resize-y leading-relaxed'}
                 value={invoice.remarks}
                 onChange={(event) => updateInvoice({ remarks: event.target.value })}
-                placeholder="Payment terms, delivery notes, or other conditions"
+                placeholder="شروط الدفع أو ملاحظات التسليم أو غيرها"
               />
             </label>
           </div>
@@ -895,7 +895,7 @@ export default function App() {
           <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-amber-800">Payment destination</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-amber-800">جهة الدفع</p>
                 <p className="mt-1 text-sm font-bold text-slate-900">{invoice.bankName}</p>
                 <p className="mt-0.5 font-mono text-xs font-bold tracking-wide text-slate-700">{invoice.accountNumber}</p>
               </div>
@@ -905,7 +905,7 @@ export default function App() {
                 className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-white px-2.5 py-2 text-[11px] font-bold text-amber-900 transition hover:bg-amber-100"
               >
                 {copiedAccount ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                {copiedAccount ? 'Copied' : 'Copy'}
+                {copiedAccount ? 'تم النسخ' : 'نسخ'}
               </button>
             </div>
             <p className="mt-3 border-t border-amber-200/80 pt-3 text-[11px] leading-relaxed text-amber-900/80">{invoice.notes}</p>
@@ -915,11 +915,11 @@ export default function App() {
         <section className="min-w-0">
           <div className="no-print mb-3 flex items-center justify-between gap-4 px-1">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500">Live document</p>
-              <p className="mt-0.5 text-sm font-semibold text-slate-800">What your customer receives</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500">المستند المباشر</p>
+              <p className="mt-0.5 text-sm font-semibold text-slate-800">ما الذي يستلمه العميل</p>
             </div>
             <span className="hidden rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-500 shadow-sm sm:inline">
-              A4-ready layout
+              تنسيق جاهز لـ A4
             </span>
           </div>
 
@@ -989,7 +989,7 @@ export default function App() {
                     {invoice.items.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="px-3 py-8 text-center text-sm text-slate-500">
-                          No items added yet. Add each item one by one.
+                          لا توجد عناصر مضافة بعد. أضف كل عنصر واحدًا تلو الآخر.
                         </td>
                       </tr>
                     ) : (
@@ -1020,7 +1020,7 @@ export default function App() {
                 <div className="mt-8 grid grid-cols-[1fr_260px] gap-10">
                   <div className="space-y-5">
                     <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-amber-800">Payment details</p>
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-amber-800">تفاصيل الدفع</p>
                       <div className="mt-3 grid grid-cols-[100px_1fr] gap-y-1.5 text-xs">
                         <span className="font-medium text-slate-500">Bank</span>
                         <span className="font-bold text-slate-800">{invoice.bankName}</span>
@@ -1072,7 +1072,7 @@ export default function App() {
 
                 <footer className="mt-auto pt-10 text-center">
                   <div className="border-t border-slate-200 pt-5">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">Thank you for your business</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">شكراً لك على ثقتك بنا</p>
                     <p className="mt-1 text-[10px] text-slate-400">{invoice.shopName} · {invoice.shopAddress}</p>
                     <p className="mt-1 text-[10px] text-slate-400">{invoice.shopEmail} · {invoice.shopPhone}</p>
                   </div>
@@ -1102,8 +1102,8 @@ export default function App() {
             <div className="flex items-start justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
               <div>
                 <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-emerald-700">Browser library</p>
-                <h2 id="library-title" className="mt-1 text-lg font-extrabold tracking-tight text-slate-950">Saved invoice drafts</h2>
-                <p className="mt-1 text-xs text-slate-500">Save, load, or move invoice data without a server.</p>
+                <h2 id="library-title" className="mt-1 text-lg font-extrabold tracking-tight text-slate-950">مسودات الفواتير المحفوظة</h2>
+                <p className="mt-1 text-xs text-slate-500">احفظ أو حمل أو نقل بيانات الفاتورة بدون خادم.</p>
               </div>
               <button
                 type="button"
@@ -1123,7 +1123,7 @@ export default function App() {
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 text-xs font-bold text-white transition hover:bg-emerald-800"
                 >
                   <Save className="h-4 w-4" />
-                  Save current draft
+                  حفظ المسودة الحالية
                 </button>
                 <button
                   type="button"
@@ -1131,7 +1131,7 @@ export default function App() {
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold text-slate-700 transition hover:bg-slate-50"
                 >
                   <Download className="h-4 w-4" />
-                  Export backup
+                  تصدير نسخة احتياطية
                 </button>
                 <button
                   type="button"
@@ -1139,20 +1139,20 @@ export default function App() {
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold text-slate-700 transition hover:bg-slate-50"
                 >
                   <Upload className="h-4 w-4" />
-                  Import backup
+                  استيراد نسخة احتياطية
                 </button>
               </div>
 
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-xs font-extrabold uppercase tracking-[0.13em] text-slate-500">Your saved drafts</h3>
+                <h3 className="text-xs font-extrabold uppercase tracking-[0.13em] text-slate-500">مسوداتك المحفوظة</h3>
                 <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500">{savedInvoices.length}</span>
               </div>
 
               {savedInvoices.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-12 text-center">
                   <FolderOpen className="mx-auto h-7 w-7 text-slate-300" />
-                  <p className="mt-3 text-sm font-bold text-slate-700">No saved drafts yet</p>
-                  <p className="mt-1 text-xs text-slate-500">Save the current invoice to keep a named snapshot here.</p>
+                  <p className="mt-3 text-sm font-bold text-slate-700">لا توجد مسودات محفوظة</p>
+                  <p className="mt-1 text-xs text-slate-500">احفظ الفاتورة الحالية للحفاظ على نسخة مسماة هنا.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -1178,7 +1178,7 @@ export default function App() {
                         onClick={() => handleLoadDraft(draft)}
                         className="rounded-lg bg-slate-900 px-2.5 py-1.5 text-[11px] font-bold text-white transition hover:bg-slate-700"
                       >
-                        Load
+                        تحميل
                       </button>
                       <button
                         type="button"
