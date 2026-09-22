@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1e293b;
+    background-color: #f1f5f9;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+}
+
+.invoice-document {
+  width: min(100%, 794px);
+}
+
+/* Styles applied during client-side PDF canvas rendering */
+.is-exporting .no-pdf,
+.is-exporting button,
+.is-exporting .action-col {
+  display: none !important;
+}
+
+.is-exporting input,
+.is-exporting textarea {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+@media (max-width: 640px) {
+  .invoice-document {
+    min-width: 0 !important;
+    padding: 1rem !important;
+  }
+
+  .invoice-document table {
+    font-size: 10px;
+  }
+}
+
+@media print {
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide navigation, toolbars, buttons during browser print */
+  .no-print, nav, header, aside, .editor-panel, button, .action-bar, .no-pdf, .action-col {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  #printable-invoice {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 auto !important;
+    padding: 10mm 12mm !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+  }
+
+  input, textarea {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 6mm;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

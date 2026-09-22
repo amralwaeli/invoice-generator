@@ -1,0 +1,6 @@
+{
+  "name": "Invoice Generator",
+  "description": "Simple single-page invoice creator for Yaman Mart with instant client-side PDF export, item quantity and unit price calculations, and Maybank payment details.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
