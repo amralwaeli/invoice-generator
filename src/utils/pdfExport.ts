@@ -31,6 +31,21 @@ function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Unknown error';
 }
 
+function isMobileBrowser(): boolean {
+  if (typeof navigator === 'undefined') return false;
+
+  const userAgent = navigator.userAgent || '';
+  const coarsePointer =
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(pointer: coarse)').matches;
+
+  return (
+    coarsePointer ||
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+  );
+}
+
 /**
  * Keeps download names portable across Windows, macOS, and browsers. The file
  * never touches the local filesystem, but a clean name avoids failed downloads
@@ -312,8 +327,9 @@ export async function printInvoice(
   options?: { filename?: string; onProgress?: (status: string) => void }
 ): Promise<{ method: 'native' | 'pdf_download'; error?: string }> {
   const isInIframe = window.self !== window.top;
+  const usePdfFallback = isMobileBrowser() || isInIframe;
 
-  if (!isInIframe) {
+  if (!usePdfFallback && element) {
     try {
       window.print();
       return { method: 'native' };
