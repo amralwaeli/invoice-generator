@@ -54,7 +54,6 @@ function newId(prefix: string): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return prefix + '-' + crypto.randomUUID();
   }
-
   return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
 }
 
@@ -117,7 +116,6 @@ function readNumberInput(value: unknown, fallback: number | ''): number | '' {
 
 function normalizeItems(value: unknown): SimpleInvoiceItem[] {
   if (!Array.isArray(value)) return [];
-
   return value
     .filter(isRecord)
     .map((item) => ({
@@ -171,7 +169,6 @@ function loadDraft(): SimpleInvoiceData {
   try {
     const saved = localStorage.getItem(DRAFT_STORAGE_KEY) || localStorage.getItem('yaman_mart_invoice');
     if (!saved) return createBlankInvoice();
-
     const parsed = JSON.parse(saved);
     const normalized = normalizeInvoice(parsed);
     return normalized.items.length === 0 || normalized.customerName === ''
@@ -186,10 +183,8 @@ function loadLibrary(): SavedInvoice[] {
   try {
     const raw = localStorage.getItem(LIBRARY_STORAGE_KEY);
     if (!raw) return [];
-
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-
     return parsed
       .filter(isRecord)
       .filter((entry) => isRecord(entry.invoice))
@@ -225,7 +220,6 @@ function formatDate(value: string): string {
   if (!value) return '—';
   const parts = value.split('-').map(Number);
   if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) return value;
-
   return new Intl.DateTimeFormat('en-MY', {
     day: '2-digit',
     month: 'short',
@@ -248,22 +242,10 @@ function statusFor(invoice: SimpleInvoiceData): DisplayStatus {
 }
 
 const statusDetails: Record<DisplayStatus, { label: string; className: string }> = {
-  draft: {
-    label: 'مسودة',
-    className: 'border-slate-200 bg-slate-100 text-slate-700',
-  },
-  sent: {
-    label: 'تستحق الدفع',
-    className: 'border-amber-200 bg-amber-50 text-amber-800',
-  },
-  paid: {
-    label: 'مدفوعة',
-    className: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-  },
-  overdue: {
-    label: 'متأخرة',
-    className: 'border-rose-200 bg-rose-50 text-rose-800',
-  },
+  draft: { label: 'مسودة', className: 'border-slate-200 bg-slate-100 text-slate-700' },
+  sent: { label: 'تستحق الدفع', className: 'border-amber-200 bg-amber-50 text-amber-800' },
+  paid: { label: 'مدفوعة', className: 'border-emerald-200 bg-emerald-50 text-emerald-800' },
+  overdue: { label: 'متأخرة', className: 'border-rose-200 bg-rose-50 text-rose-800' },
 };
 
 export default function App() {
@@ -322,17 +304,13 @@ export default function App() {
   useEffect(() => {
     try {
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(invoice));
-    } catch {
-      // A full or disabled browser store should never interrupt invoicing.
-    }
+    } catch {}
   }, [invoice]);
 
   useEffect(() => {
     try {
       localStorage.setItem(LIBRARY_STORAGE_KEY, JSON.stringify(savedInvoices.slice(0, 30)));
-    } catch {
-      // The working draft continues to be usable if the library cannot persist.
-    }
+    } catch {}
   }, [savedInvoices]);
 
   useEffect(() => {
@@ -347,36 +325,25 @@ export default function App() {
     setInvoice((current) => ({ ...current, ...updates }));
   };
 
-  const updateItem = (
-    id: string,
-    field: 'description' | 'quantity' | 'unitPrice',
-    rawValue: string
-  ) => {
+  const updateItem = (id: string, field: 'description' | 'quantity' | 'unitPrice', rawValue: string) => {
     setInvoice((current) => ({
       ...current,
       items: current.items.map((item) => {
         if (item.id !== id) return item;
         if (field === 'description') return { ...item, description: rawValue };
-        return {
-          ...item,
-          [field]: rawValue === '' ? '' : Math.max(0, Number(rawValue) || 0),
-        };
+        return { ...item, [field]: rawValue === '' ? '' : Math.max(0, Number(rawValue) || 0) };
       }),
     }));
   };
 
   const addItem = () => {
-    setInvoice((current) => ({
-      ...current,
-      items: [...current.items, createLineItem()],
-    }));
+    setInvoice((current) => ({ ...current, items: [...current.items, createLineItem()] }));
   };
 
   const duplicateItem = (id: string) => {
     setInvoice((current) => {
       const itemIndex = current.items.findIndex((item) => item.id === id);
       if (itemIndex < 0) return current;
-
       const items = [...current.items];
       const source = items[itemIndex];
       items.splice(itemIndex + 1, 0, {
@@ -393,10 +360,7 @@ export default function App() {
       if (current.items.length === 1) {
         return { ...current, items: [] };
       }
-      return {
-        ...current,
-        items: current.items.filter((item) => item.id !== id),
-      };
+      return { ...current, items: current.items.filter((item) => item.id !== id) };
     });
   };
 
@@ -414,7 +378,6 @@ export default function App() {
       savedAt: Date.now(),
       invoice: normalizeInvoice(invoice),
     };
-
     setSavedInvoices((current) => {
       const withoutCurrent = current.filter((entry) => entry.id !== draft.id);
       return [draft, ...withoutCurrent].slice(0, 30);
@@ -437,9 +400,7 @@ export default function App() {
   };
 
   const handleDownloadData = () => {
-    const blob = new Blob([JSON.stringify(invoice, null, 2)], {
-      type: 'application/json',
-    });
+    const blob = new Blob([JSON.stringify(invoice, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
@@ -455,7 +416,6 @@ export default function App() {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = () => {
       try {
@@ -480,7 +440,6 @@ export default function App() {
       showToast('error', 'Invoice preview is unavailable.');
       return;
     }
-
     try {
       setIsExporting(true);
       setExportStatus('Preparing your PDF…');
@@ -503,17 +462,13 @@ export default function App() {
       showToast('error', 'Invoice preview is unavailable.');
       return;
     }
-
     try {
       setIsPrinting(true);
       const result = await printInvoice(previewRef.current, {
         filename: filenameBase(invoice) + '.pdf',
         onProgress: setExportStatus,
       });
-      showToast(
-        'success',
-        result.method === 'native' ? 'Print dialog opened.' : 'Print-ready PDF downloaded.'
-      );
+      showToast('success', result.method === 'native' ? 'Print dialog opened.' : 'Print-ready PDF downloaded.');
     } catch (error) {
       console.error('Print failed:', error);
       showToast('error', 'Could not prepare the invoice for printing.');
@@ -633,7 +588,6 @@ export default function App() {
                 حفظ تلقائي
               </span>
             </div>
-
             <div className="grid grid-cols-2 gap-3">
               <label className="col-span-2">
                 <span className={labelClass}>رقم الفاتورة</span>
@@ -663,7 +617,6 @@ export default function App() {
                 />
               </label>
             </div>
-
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -714,7 +667,6 @@ export default function App() {
                 أضف عنصر
               </button>
             </div>
-
             <div className="space-y-3">
               {invoice.items.map((item, index) => (
                 <div key={item.id} className="rounded-xl border border-slate-200 bg-slate-50/70 p-3">
@@ -726,8 +678,6 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => duplicateItem(item.id)}
-                        aria-label={'Duplicate line ' + (index + 1)}
-                        title="تكرار السطر"
                         className="rounded-md p-1.5 text-slate-400 transition hover:bg-white hover:text-emerald-700"
                       >
                         <Copy className="h-3.5 w-3.5" />
@@ -735,8 +685,6 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => removeItem(item.id)}
-                        aria-label={'Delete line ' + (index + 1)}
-                        title="حذف السطر"
                         className="rounded-md p-1.5 text-slate-400 transition hover:bg-white hover:text-rose-700"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -744,7 +692,6 @@ export default function App() {
                     </div>
                   </div>
                   <input
-                    aria-label={'Description for line ' + (index + 1)}
                     className={fieldClass}
                     value={item.description}
                     onChange={(event) => updateItem(item.id, 'description', event.target.value)}
@@ -754,7 +701,6 @@ export default function App() {
                     <label>
                       <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">الكمية</span>
                       <input
-                        aria-label={'Quantity for line ' + (index + 1)}
                         type="number"
                         min="0"
                         step="any"
@@ -766,7 +712,6 @@ export default function App() {
                     <label>
                       <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">السعر</span>
                       <input
-                        aria-label={'Unit price for line ' + (index + 1)}
                         type="number"
                         min="0"
                         step="0.01"
@@ -794,7 +739,6 @@ export default function App() {
                 <p className="text-[11px] text-slate-500">الخصم، الضريبة، وملاحظات الدفع</p>
               </div>
             </div>
-
             <div className="grid grid-cols-2 gap-3">
               <label>
                 <span className={labelClass}>نوع الخصم</span>
@@ -802,9 +746,7 @@ export default function App() {
                   className={fieldClass}
                   value={invoice.discountType}
                   onChange={(event) =>
-                    updateInvoice({
-                      discountType: event.target.value === 'percentage' ? 'percentage' : 'fixed',
-                    })
+                    updateInvoice({ discountType: event.target.value === 'percentage' ? 'percentage' : 'fixed' })
                   }
                 >
                   <option value="fixed">المبلغ (RM)</option>
@@ -842,9 +784,7 @@ export default function App() {
                   className={fieldClass}
                   value={invoice.taxType}
                   onChange={(event) =>
-                    updateInvoice({
-                      taxType: event.target.value === 'fixed' ? 'fixed' : 'percentage',
-                    })
+                    updateInvoice({ taxType: event.target.value === 'fixed' ? 'fixed' : 'percentage' })
                   }
                 >
                   <option value="percentage">النسبة (%)</option>
@@ -879,7 +819,6 @@ export default function App() {
                 </div>
               </label>
             </div>
-
             <label className="mt-4 block">
               <span className={labelClass}>ملاحظات تظهر في الفاتورة</span>
               <textarea
@@ -908,7 +847,9 @@ export default function App() {
                 {copiedAccount ? 'تم النسخ' : 'نسخ'}
               </button>
             </div>
-            <p className="mt-3 border-t border-amber-200/80 pt-3 text-[11px] leading-relaxed text-amber-900/80">{invoice.notes}</p>
+            <p className="mt-3 border-t border-amber-200/80 pt-3 text-[11px] leading-relaxed text-amber-900/80">
+              {invoice.notes}
+            </p>
           </div>
         </aside>
 
@@ -930,7 +871,7 @@ export default function App() {
               className="invoice-document mx-auto min-h-[1120px] w-full max-w-[794px] bg-white p-0 text-slate-800 shadow-2xl ring-1 ring-slate-900/5 sm:p-0"
             >
               <div className="flex min-h-[1024px] flex-col bg-white">
-                {/* Header Section with Logo */}
+                {/* Header Section */}
                 <div className="relative border-b-4 border-emerald-600 px-8 pt-8 pb-6">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4">
@@ -942,9 +883,7 @@ export default function App() {
                         />
                       </div>
                       <div>
-                        <h1 className="text-3xl font-black tracking-tight text-slate-900">
-                          {invoice.shopName}
-                        </h1>
+                        <h1 className="text-3xl font-black tracking-tight text-slate-900">{invoice.shopName}</h1>
                         {invoice.companyReg && (
                           <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-emerald-700">
                             Reg. No: {invoice.companyReg}
@@ -957,14 +896,11 @@ export default function App() {
                         </div>
                       </div>
                     </div>
-                    
                     <div className="text-right">
                       <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 ring-1 ring-emerald-200">
                         <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Invoice</span>
                       </div>
-                      <h2 className="mt-3 text-4xl font-black text-slate-900">
-                        {invoice.invoiceNumber || '—'}
-                      </h2>
+                      <h2 className="mt-3 text-4xl font-black text-slate-900">{invoice.invoiceNumber || '—'}</h2>
                       <div className="mt-4 space-y-1 text-sm">
                         <div className="flex items-center justify-end gap-3">
                           <span className="text-slate-500">Issue Date:</span>
@@ -987,18 +923,20 @@ export default function App() {
                       <p className="mt-3 text-lg font-bold text-slate-900">
                         {invoice.customerName.trim() || 'Walk-in Customer'}
                       </p>
-                      {invoice.customerPhone && (
-                        <p className="mt-1 text-sm text-slate-600">{invoice.customerPhone}</p>
-                      )}
+                      {invoice.customerPhone && <p className="mt-1 text-sm text-slate-600">{invoice.customerPhone}</p>}
                     </div>
-                    
                     <div className="flex items-end justify-end">
-                      <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold ${
-                        displayStatus === 'paid' ? 'bg-emerald-100 text-emerald-800' :
-                        displayStatus === 'overdue' ? 'bg-rose-100 text-rose-800' :
-                        displayStatus === 'sent' ? 'bg-amber-100 text-amber-800' :
-                        'bg-slate-100 text-slate-700'
-                      }`}>
+                      <div
+                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold ${
+                          displayStatus === 'paid'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : displayStatus === 'overdue'
+                              ? 'bg-rose-100 text-rose-800'
+                              : displayStatus === 'sent'
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-slate-100 text-slate-700'
+                        }`}
+                      >
                         <span className="h-2 w-2 rounded-full bg-current"></span>
                         {displayStatusInfo.label}
                       </div>
@@ -1057,7 +995,6 @@ export default function App() {
 
                 {/* Totals and Payment Section */}
                 <div className="grid grid-cols-[1fr_320px] gap-8 px-8 pb-8">
-                  {/* Payment Details */}
                   <div className="space-y-6">
                     <div className="rounded-xl bg-emerald-50 p-5 ring-1 ring-emerald-200">
                       <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-800">
@@ -1083,50 +1020,45 @@ export default function App() {
                         </p>
                       )}
                     </div>
-
                     {invoice.remarks && (
                       <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200">
                         <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                           Terms & Conditions
                         </h3>
-                        <p className="mt-3 text-sm leading-relaxed text-slate-700">
-                          {invoice.remarks}
-                        </p>
+                        <p className="mt-3 text-sm leading-relaxed text-slate-700">{invoice.remarks}</p>
                       </div>
                     )}
                   </div>
 
-                  {/* Totals */}
                   <div className="rounded-xl bg-slate-900 p-6 text-white">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">
-                      Order Summary
-                    </h3>
-                    
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Order Summary</h3>
                     <div className="mt-5 space-y-3 text-sm">
                       <div className="flex justify-between text-slate-300">
                         <span>Subtotal ({totals.quantity} items)</span>
                         <span className="font-mono font-semibold">{formatMoney(totals.subtotal, invoice.currencySymbol)}</span>
                       </div>
-                      
                       {totals.discountAmount > 0 && (
                         <div className="flex justify-between text-emerald-400">
                           <span>
                             Discount {invoice.discountType === 'percentage' && invoice.discountValue > 0 && `(${invoice.discountValue}%)`}
                           </span>
-                          <span className="font-mono font-semibold">− {formatMoney(totals.discountAmount, invoice.currencySymbol)}</span>
+                          <span className="font-mono font-semibold">
+                            − {formatMoney(totals.discountAmount, invoice.currencySymbol)}
+                          </span>
                         </div>
                       )}
-                      
                       {totals.taxAmount > 0 && (
                         <div className="flex justify-between text-slate-300">
                           <span>
-                            {invoice.taxName || 'Tax'} {invoice.taxType === 'percentage' && invoice.taxRate > 0 && `(${invoice.taxRate}%)`}
+                            {invoice.taxName || 'Tax'}{' '}
+                            {invoice.taxType === 'percentage' && invoice.taxRate > 0 && `(${invoice.taxRate}%)`}
                           </span>
-                          <span className="font-mono font-semibold">+ {formatMoney(totals.taxAmount, invoice.currencySymbol)}</span>
+                          <span className="font-mono font-semibold">
+                            + {formatMoney(totals.taxAmount, invoice.currencySymbol)}
+                          </span>
                         </div>
                       )}
                     </div>
-
                     <div className="mt-5 border-t-2 border-emerald-500 pt-5">
                       <div className="flex justify-between items-end">
                         <div>
@@ -1183,19 +1115,19 @@ export default function App() {
             <div className="flex items-start justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
               <div>
                 <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-emerald-700">Browser library</p>
-                <h2 id="library-title" className="mt-1 text-lg font-extrabold tracking-tight text-slate-950">مسودات الفواتير المحفوظة</h2>
+                <h2 id="library-title" className="mt-1 text-lg font-extrabold tracking-tight text-slate-950">
+                  مسودات الفواتير المحفوظة
+                </h2>
                 <p className="mt-1 text-xs text-slate-500">احفظ أو حمل أو نقل بيانات الفاتورة بدون خادم.</p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsLibraryOpen(false)}
-                aria-label="Close invoice library"
                 className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-
             <div className="max-h-[65vh] overflow-y-auto p-5 sm:p-6">
               <div className="mb-5 grid gap-3 sm:grid-cols-3">
                 <button
@@ -1223,12 +1155,12 @@ export default function App() {
                   استيراد نسخة احتياطية
                 </button>
               </div>
-
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-xs font-extrabold uppercase tracking-[0.13em] text-slate-500">مسوداتك المحفوظة</h3>
-                <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500">{savedInvoices.length}</span>
+                <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500">
+                  {savedInvoices.length}
+                </span>
               </div>
-
               {savedInvoices.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-12 text-center">
                   <FolderOpen className="mx-auto h-7 w-7 text-slate-300" />
@@ -1238,14 +1170,18 @@ export default function App() {
               ) : (
                 <div className="space-y-2">
                   {savedInvoices.map((draft) => (
-                    <div key={draft.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-emerald-300 hover:bg-emerald-50/20">
+                    <div
+                      key={draft.id}
+                      className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-emerald-300 hover:bg-emerald-50/20"
+                    >
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
                         <FileText className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-xs font-bold text-slate-900">{draft.name}</p>
                         <p className="mt-0.5 text-[11px] text-slate-500">
-                          {formatDate(draft.invoice.date)} · {draft.invoice.items.length} lines · {formatMoney(
+                          {formatDate(draft.invoice.date)} · {draft.invoice.items.length} lines ·{' '}
+                          {formatMoney(
                             draft.invoice.items.reduce(
                               (sum, item) => sum + numericValue(item.quantity) * numericValue(item.unitPrice),
                               0
@@ -1264,7 +1200,6 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => handleDeleteDraft(draft.id)}
-                        aria-label={'Delete ' + draft.name}
                         className="rounded-lg p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-700"
                       >
                         <Trash2 className="h-4 w-4" />
