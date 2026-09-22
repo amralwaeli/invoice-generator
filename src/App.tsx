@@ -989,7 +989,7 @@ export default function App() {
                     {invoice.items.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="px-3 py-8 text-center text-sm text-slate-500">
-                          لا توجد عناصر مضافة بعد. أضف كل عنصر واحدًا تلو الآخر.
+                          No items added yet. Add each item one by one.
                         </td>
                       </tr>
                     ) : (
@@ -1020,7 +1020,7 @@ export default function App() {
                 <div className="mt-8 grid grid-cols-[1fr_260px] gap-10">
                   <div className="space-y-5">
                     <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-amber-800">تفاصيل الدفع</p>
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-amber-800">Payment details</p>
                       <div className="mt-3 grid grid-cols-[100px_1fr] gap-y-1.5 text-xs">
                         <span className="font-medium text-slate-500">Bank</span>
                         <span className="font-bold text-slate-800">{invoice.bankName}</span>
@@ -1072,7 +1072,7 @@ export default function App() {
 
                 <footer className="mt-auto pt-10 text-center">
                   <div className="border-t border-slate-200 pt-5">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">شكراً لك على ثقتك بنا</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">Thank you for your business</p>
                     <p className="mt-1 text-[10px] text-slate-400">{invoice.shopName} · {invoice.shopAddress}</p>
                     <p className="mt-1 text-[10px] text-slate-400">{invoice.shopEmail} · {invoice.shopPhone}</p>
                   </div>
