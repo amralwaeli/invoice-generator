@@ -22,8 +22,15 @@ import {
   DEFAULT_YAMAN_MART_INVOICE,
   SimpleInvoiceData,
   SimpleInvoiceItem,
+  formatMoney,
+  numericValue,
+  formatDate,
+  filenameBase,
+  todayIso,
+  dateInDays,
 } from './utils/yamanMartDefaults.ts';
 import { generateInvoicePDF, printInvoice } from './utils/pdfExport.ts';
+import { InvoicePreview } from './components/InvoicePreview.tsx';
 
 type Toast = {
   type: 'success' | 'error' | 'info';
@@ -55,16 +62,6 @@ function newId(prefix: string): string {
     return prefix + '-' + crypto.randomUUID();
   }
   return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
-}
-
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function dateInDays(days: number): string {
-  const value = new Date();
-  value.setDate(value.getDate() + days);
-  return value.toISOString().slice(0, 10);
 }
 
 function makeInvoiceNumber(): string {
@@ -152,7 +149,6 @@ function normalizeInvoice(value: unknown): SimpleInvoiceData {
     taxName: readString(value.taxName, defaults.taxName),
     notes: readString(value.notes, defaults.notes),
     remarks: readString(value.remarks, defaults.remarks),
-    currencySymbol: readString(value.currencySymbol, defaults.currencySymbol),
     logoUrl: defaults.logoUrl,
     shopName: defaults.shopName,
     companyReg: defaults.companyReg,
@@ -198,41 +194,6 @@ function loadLibrary(): SavedInvoice[] {
   } catch {
     return [];
   }
-}
-
-function numericValue(value: number | ''): number {
-  const numberValue = Number(value);
-  return Number.isFinite(numberValue) && numberValue > 0 ? numberValue : 0;
-}
-
-function formatMoney(value: number, symbol: string): string {
-  return (
-    (symbol || 'RM') +
-    ' ' +
-    value.toLocaleString('en-MY', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-  );
-}
-
-function formatDate(value: string): string {
-  if (!value) return '—';
-  const parts = value.split('-').map(Number);
-  if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) return value;
-  return new Intl.DateTimeFormat('en-MY', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(parts[0], parts[1] - 1, parts[2]));
-}
-
-function filenameBase(invoice: SimpleInvoiceData): string {
-  const safeNumber = (invoice.invoiceNumber || 'invoice')
-    .trim()
-    .replace(/[^a-z0-9-_]+/gi, '-')
-    .replace(/^-+|-+$/g, '');
-  return safeNumber || 'invoice';
 }
 
 function statusFor(invoice: SimpleInvoiceData): DisplayStatus {
@@ -508,65 +469,68 @@ export default function App() {
   return (
     <div dir="rtl" className="min-h-screen bg-[#f4f7f5] text-slate-800">
       <header className="no-print sticky top-0 z-40 border-b border-slate-200/90 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1480px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-700 text-white shadow-sm">
-              <Store className="h-5 w-5" />
+        <div className="mx-auto flex max-w-[1480px] flex-wrap items-center justify-between gap-2 px-3 py-2.5 sm:px-6 sm:py-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-700 text-white shadow-sm">
+              <Store className="h-4.5 w-4.5" />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <h1 className="truncate text-sm font-extrabold tracking-tight text-slate-950 sm:text-base">
                   Yaman Mart
                 </h1>
-                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800">
+                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-800 sm:hidden">
+                  فاتورة
+                </span>
+                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800 hidden sm:inline">
                   استوديو الفاتورة
                 </span>
               </div>
-              <p className="hidden text-[11px] font-medium text-slate-500 sm:block">
+              <p className="hidden text-[10px] font-medium text-slate-500 sm:block">
                 فواتير احترافية، محفوظة بشكل خاص في هذا المتصفح
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={handleNewInvoice}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
+              className="inline-flex min-h-[40px] items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 sm:px-2.5 sm:py-2"
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">جديد</span>
+              <span className="hidden xs:inline sm:inline">جديد</span>
             </button>
             <button
               type="button"
               onClick={() => setIsLibraryOpen(true)}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex min-h-[40px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 sm:px-2.5 sm:py-2"
             >
               <FolderOpen className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">المكتبة</span>
+              <span className="hidden xs:inline sm:inline">المكتبة</span>
             </button>
             <button
               type="button"
               onClick={handleSaveDraft}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex min-h-[40px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 sm:px-2.5 sm:py-2"
             >
               <Save className="h-3.5 w-3.5" />
-              <span className="hidden md:inline">حفظ المسودة</span>
+              <span className="hidden xs:inline sm:inline">حفظ المسودة</span>
             </button>
             <button
               type="button"
               onClick={handlePrint}
               disabled={isPrinting || isExporting}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-[40px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:px-2.5 sm:py-2"
             >
               {isPrinting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Printer className="h-3.5 w-3.5" />}
-              <span className="hidden sm:inline">{isPrinting ? 'جارِ التحضير' : 'طباعة'}</span>
+              <span className="hidden xs:inline sm:inline">{isPrinting ? 'جارِ التحضير' : 'طباعة'}</span>
             </button>
             <button
               type="button"
               onClick={handleDownloadPdf}
               disabled={isExporting || isPrinting}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-emerald-400"
+              className="inline-flex min-h-[40px] items-center gap-1 rounded-lg bg-emerald-700 px-2.5 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-emerald-400 sm:px-3 sm:py-2"
             >
               {isExporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
               <span>{isExporting ? exportStatus || 'جارِ التصدير' : 'تحميل PDF'}</span>
@@ -722,7 +686,7 @@ export default function App() {
                     </label>
                   </div>
                   <p className="mt-2 text-right font-mono text-xs font-bold text-emerald-800">
-                    {formatMoney(numericValue(item.quantity) * numericValue(item.unitPrice), invoice.currencySymbol)}
+                    {formatMoney(numericValue(item.quantity) * numericValue(item.unitPrice))}
                   </p>
                 </div>
               ))}
@@ -870,227 +834,10 @@ export default function App() {
               id="printable-invoice"
               className="invoice-document mx-auto min-h-[1120px] w-full max-w-[794px] bg-white p-0 text-slate-800 shadow-2xl ring-1 ring-slate-900/5 sm:p-0"
             >
-              <div className="flex min-h-[1024px] flex-col bg-white">
-                {/* Header Section */}
-                <div className="relative border-b-4 border-emerald-600 px-8 pt-8 pb-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="h-20 w-20 overflow-hidden rounded-lg bg-emerald-50 ring-2 ring-emerald-100">
-                        <img
-                          src={invoice.logoUrl || './yaman_mart_banner.jpg'}
-                          alt="Store logo"
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <h1 className="text-3xl font-black tracking-tight text-slate-900">{invoice.shopName}</h1>
-                        {invoice.companyReg && (
-                          <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-emerald-700">
-                            Reg. No: {invoice.companyReg}
-                          </p>
-                        )}
-                        <div className="mt-3 space-y-1 text-xs text-slate-600">
-                          <p>{invoice.shopAddress}</p>
-                          <p>{invoice.shopEmail}</p>
-                          <p>{invoice.shopPhone}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 ring-1 ring-emerald-200">
-                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Invoice</span>
-                      </div>
-                      <h2 className="mt-3 text-4xl font-black text-slate-900">{invoice.invoiceNumber || '—'}</h2>
-                      <div className="mt-4 space-y-1 text-sm">
-                        <div className="flex items-center justify-end gap-3">
-                          <span className="text-slate-500">Issue Date:</span>
-                          <span className="font-semibold text-slate-900">{formatDate(invoice.date)}</span>
-                        </div>
-                        <div className="flex items-center justify-end gap-3">
-                          <span className="text-slate-500">Due Date:</span>
-                          <span className="font-semibold text-slate-900">{formatDate(invoice.dueDate)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bill To Section */}
-                <div className="px-8 py-6">
-                  <div className="grid grid-cols-2 gap-8">
-                    <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Bill To</h3>
-                      <p className="mt-3 text-lg font-bold text-slate-900">
-                        {invoice.customerName.trim() || 'Walk-in Customer'}
-                      </p>
-                      {invoice.customerPhone && <p className="mt-1 text-sm text-slate-600">{invoice.customerPhone}</p>}
-                    </div>
-                    <div className="flex items-end justify-end">
-                      <div
-                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold ${
-                          displayStatus === 'paid'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : displayStatus === 'overdue'
-                              ? 'bg-rose-100 text-rose-800'
-                              : displayStatus === 'sent'
-                                ? 'bg-amber-100 text-amber-800'
-                                : 'bg-slate-100 text-slate-700'
-                        }`}
-                      >
-                        <span className="h-2 w-2 rounded-full bg-current"></span>
-                        {displayStatusInfo.label}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Items Table */}
-                <div className="px-8 pb-6">
-                  <div className="overflow-hidden rounded-xl ring-1 ring-slate-200">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-slate-900 text-white">
-                          <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">#</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Description</th>
-                          <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider">Qty</th>
-                          <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider">Unit Price</th>
-                          <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider">Amount</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200 bg-white">
-                        {invoice.items.length === 0 ? (
-                          <tr>
-                            <td colSpan={5} className="px-6 py-12 text-center text-sm text-slate-500">
-                              No items added yet
-                            </td>
-                          </tr>
-                        ) : (
-                          invoice.items.map((item, index) => {
-                            const lineTotal = numericValue(item.quantity) * numericValue(item.unitPrice);
-                            return (
-                              <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                                <td className="px-6 py-4 text-sm font-mono font-medium text-slate-500">
-                                  {String(index + 1).padStart(2, '0')}
-                                </td>
-                                <td className="px-6 py-4 text-sm font-semibold text-slate-900">
-                                  {item.description.trim() || 'Item description'}
-                                </td>
-                                <td className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
-                                  {numericValue(item.quantity)}
-                                </td>
-                                <td className="px-6 py-4 text-right text-sm font-mono text-slate-700">
-                                  {formatMoney(numericValue(item.unitPrice), invoice.currencySymbol)}
-                                </td>
-                                <td className="px-6 py-4 text-right text-sm font-mono font-bold text-slate-900">
-                                  {formatMoney(lineTotal, invoice.currencySymbol)}
-                                </td>
-                              </tr>
-                            );
-                          })
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Totals and Payment Section */}
-                <div className="grid grid-cols-[1fr_320px] gap-8 px-8 pb-8">
-                  <div className="space-y-6">
-                    <div className="rounded-xl bg-emerald-50 p-5 ring-1 ring-emerald-200">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-                        Payment Information
-                      </h3>
-                      <div className="mt-4 space-y-3">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-slate-600">Bank Name</span>
-                          <span className="font-semibold text-slate-900">{invoice.bankName}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-slate-600">Account Name</span>
-                          <span className="font-semibold text-slate-900">{invoice.accountName}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-slate-600">Account Number</span>
-                          <span className="font-mono font-bold text-emerald-700">{invoice.accountNumber}</span>
-                        </div>
-                      </div>
-                      {invoice.notes && (
-                        <p className="mt-4 border-t border-emerald-200 pt-3 text-xs leading-relaxed text-emerald-900">
-                          {invoice.notes}
-                        </p>
-                      )}
-                    </div>
-                    {invoice.remarks && (
-                      <div className="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                          Terms & Conditions
-                        </h3>
-                        <p className="mt-3 text-sm leading-relaxed text-slate-700">{invoice.remarks}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="rounded-xl bg-slate-900 p-6 text-white">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Order Summary</h3>
-                    <div className="mt-5 space-y-3 text-sm">
-                      <div className="flex justify-between text-slate-300">
-                        <span>Subtotal ({totals.quantity} items)</span>
-                        <span className="font-mono font-semibold">{formatMoney(totals.subtotal, invoice.currencySymbol)}</span>
-                      </div>
-                      {totals.discountAmount > 0 && (
-                        <div className="flex justify-between text-emerald-400">
-                          <span>
-                            Discount {invoice.discountType === 'percentage' && invoice.discountValue > 0 && `(${invoice.discountValue}%)`}
-                          </span>
-                          <span className="font-mono font-semibold">
-                            − {formatMoney(totals.discountAmount, invoice.currencySymbol)}
-                          </span>
-                        </div>
-                      )}
-                      {totals.taxAmount > 0 && (
-                        <div className="flex justify-between text-slate-300">
-                          <span>
-                            {invoice.taxName || 'Tax'}{' '}
-                            {invoice.taxType === 'percentage' && invoice.taxRate > 0 && `(${invoice.taxRate}%)`}
-                          </span>
-                          <span className="font-mono font-semibold">
-                            + {formatMoney(totals.taxAmount, invoice.currencySymbol)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="mt-5 border-t-2 border-emerald-500 pt-5">
-                      <div className="flex justify-between items-end">
-                        <div>
-                          <p className="text-xs text-slate-400">Total Amount Due</p>
-                          <p className="mt-1 text-3xl font-black text-emerald-400">
-                            {formatMoney(totals.total, invoice.currencySymbol)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-slate-400">Currency</p>
-                          <p className="font-bold">{invoice.currencySymbol}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div className="mt-auto border-t border-slate-200 px-8 py-6">
-                  <div className="flex items-center justify-between text-xs text-slate-500">
-                    <div>
-                      <p className="font-semibold text-slate-700">Thank you for your business!</p>
-                      <p className="mt-1">Please make payment within the due date to avoid late fees.</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-slate-700">{invoice.shopName}</p>
-                      <p className="mt-1">{invoice.shopEmail}</p>
-                      <p>{invoice.shopPhone}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <InvoicePreview
+                invoice={invoice}
+                totals={totals}
+              />
             </div>
           </div>
         </section>
@@ -1186,7 +933,6 @@ export default function App() {
                               (sum, item) => sum + numericValue(item.quantity) * numericValue(item.unitPrice),
                               0
                             ),
-                            draft.invoice.currencySymbol
                           )}
                         </p>
                       </div>

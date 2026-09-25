@@ -63,9 +63,22 @@
 
 /* Styles applied during client-side PDF canvas rendering */
 .is-exporting .no-pdf,
-.is-exporting button,
-.is-exporting .action-col {
+.is-exporting button:not(#printable-invoice button),
+.is-exporting .action-col,
+.is-exporting input,
+.is-exporting textarea,
+.is-exporting select {
   display: none !important;
+}
+
+.is-exporting .invoice-document {
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.is-exporting .invoice-document * {
+  transition: none !important;
 }
 
 .is-exporting input,
@@ -96,23 +109,28 @@
 }
 
 @media print {
+  /* Hide everything except the invoice */
   html, body {
     background: #ffffff !important;
-    color: #000000 !important;
+    color: #0f172a !important;
     margin: 0 !important;
     padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
   }
 
-  /* Hide navigation, toolbars, buttons during browser print */
-  .no-print, nav, header, aside, .editor-panel, button, .action-bar, .no-pdf, .action-col {
+  /* Hide all app UI */
+  header, aside, .editor-panel, .no-print, button, .action-bar, nav, .toast {
     display: none !important;
   }
 
+  /* Show only the invoice document */
   main {
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
     width: 100% !important;
+    background: #ffffff !important;
   }
 
   #printable-invoice {
@@ -123,34 +141,26 @@
     width: 100% !important;
     max-width: 100% !important;
     min-height: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
   }
 
-  input, textarea {
+  #printable-invoice * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #printable-invoice input,
+  #printable-invoice textarea {
     border: none !important;
     background: transparent !important;
     box-shadow: none !important;
     outline: none !important;
   }
 
-  /* Ensure background colors print */
-  .bg-emerald-50,
-  .bg-slate-50,
-  .bg-slate-900,
-  .bg-emerald-600,
-  .bg-emerald-100,
-  .bg-amber-100,
-  .bg-rose-100 {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
   @page {
     size: A4 portrait;
-    margin: 6mm;
-  }
-
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+    margin: 12mm;
   }
 }
