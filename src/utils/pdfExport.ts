@@ -11,33 +11,13 @@ const PDF_MARGIN_MM = 12;
 const A4_WIDTH_MM = 210;
 const A4_HEIGHT_MM = 297;
 const EXPORT_SCALE = 3;
-const EXPORTING_CLASS = 'is-exporting';
-
-const exportStates = new WeakMap<HTMLElement, { count: number; managesClass: boolean }>();
 
 function reportProgress(options: PDFExportOptions, status: string) {
-  try {
-    options.onProgress?.(status);
-  } catch {
-    console.warn('PDF export progress callback failed');
-  }
+  try { options.onProgress?.(status); } catch { /* noop */ }
 }
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Unknown error';
-}
-
-function isMobileBrowser(): boolean {
-  if (typeof navigator === 'undefined') return false;
-  const userAgent = navigator.userAgent || '';
-  const coarsePointer =
-    typeof window !== 'undefined' &&
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(pointer: coarse)').matches;
-  return (
-    coarsePointer ||
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
-  );
 }
 
 function sanitizeFilename(filename?: string): string {
@@ -54,28 +34,6 @@ function sanitizeFilename(filename?: string): string {
     baseName = 'invoice';
   }
   return `${baseName.slice(0, 116) || 'invoice'}${PDF_EXTENSION}`;
-}
-
-function beginExport(element: HTMLElement): () => void {
-  let state = exportStates.get(element);
-  if (!state) {
-    state = { count: 0, managesClass: !element.classList.contains(EXPORTING_CLASS) };
-    exportStates.set(element, state);
-  }
-  if (state.count === 0 && state.managesClass) {
-    element.classList.add(EXPORTING_CLASS);
-  }
-  state.count += 1;
-  return () => {
-    const current = exportStates.get(element);
-    if (!current) return;
-    current.count -= 1;
-    if (current.count > 0) return;
-    if (current.managesClass) {
-      element.classList.remove(EXPORTING_CLASS);
-    }
-    exportStates.delete(element);
-  };
 }
 
 function nextFrame(): Promise<void> {
@@ -110,11 +68,7 @@ async function waitForStableLayout(element: HTMLElement): Promise<void> {
   const images = Array.from(element.querySelectorAll('img'));
   await Promise.all(images.map((image) => waitForImage(image)));
   const fonts = (document as Document & { fonts?: { ready?: Promise<unknown> } }).fonts;
-  try {
-    await fonts?.ready;
-  } catch {
-    // fine
-  }
+  try { await fonts?.ready; } catch { /* fine */ }
   await nextFrame();
 }
 
@@ -184,8 +138,34 @@ export async function generateInvoicePDF(
     throw new Error('A valid invoice element is required to generate a PDF.');
   }
 
-  const endExport = beginExport(element);
+  const wasExporting = element.classList.contains('is-exporting');
+  element.classList.add('is-exporting');
+
+  // Capture references before hiding
+  const editorPanel = document.querySelector('.editor-panel') as HTMLElement | null;
+  const headerEl = document.querySelector('header') as HTMLElement | null;
+  const libraryModal = document.querySelector('[aria-modal="true"]') as HTMLElement | null;
+  const editableInputs = Array.from(element.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('input, textarea, select'));
+
+  // Hide app chrome for clean capture
+  const hiddenElements: HTMLElement[] = [];
+  if (editorPanel) { editorPanel.style.display = 'none'; hiddenElements.push(editorPanel); }
+  if (headerEl) { headerEl.style.display = 'none'; hiddenElements.push(headerEl); }
+  if (libraryModal) { libraryModal.style.display = 'none'; hiddenElements.push(libraryModal); }
+
+  const originalInputValues: Array<{ el: Element; value: string }> = [];
+  editableInputs.forEach((el) => {
+    const inputEl = el as HTMLInputElement | HTMLTextAreaElement;
+    originalInputValues.push({ el, value: inputEl.value });
+    (el as HTMLElement).style.display = 'none';
+  });
+
+  // Force reflow
+  void element.offsetHeight;
+  await nextFrame();
+
   let canvas: HTMLCanvasElement | null = null;
+  let isComplete = false;
 
   try {
     reportProgress(options, 'Preparing document...');
@@ -202,10 +182,20 @@ export async function generateInvoicePDF(
       windowHeight: element.scrollHeight,
       scrollX: 0,
       scrollY: 0,
+      onclone: (doc) => {
+        const cloneEditor = doc.querySelector('.editor-panel') as HTMLElement | null;
+        if (cloneEditor) cloneEditor.style.display = 'none';
+        const cloneHeader = doc.querySelector('header') as HTMLElement | null;
+        if (cloneHeader) cloneHeader.style.display = 'none';
+      },
     });
 
     if (!canvas || !canvas.width || !canvas.height) {
       throw new Error('The invoice could not be rendered for PDF export.');
+    }
+
+    if (canvas.width < 100 || canvas.height < 100) {
+      throw new Error('The rendered invoice is too small — display may have been hidden.');
     }
 
     const contentWidth = A4_WIDTH_MM - PDF_MARGIN_MM * 2;
@@ -236,47 +226,49 @@ export async function generateInvoicePDF(
 
     reportProgress(options, 'Downloading PDF file...');
     pdf.save(sanitizeFilename(options.filename));
+    isComplete = true;
   } catch (error) {
     console.error('Client-side PDF generation failed:', error);
     throw new Error(`Could not generate the PDF: ${getErrorMessage(error)}`);
   } finally {
-    if (canvas) { canvas.width = 1; canvas.height = 1; }
-    endExport();
+    if (canvas && !isComplete) {
+      canvas.width = 1;
+      canvas.height = 1;
+    }
+    // Restore everything
+    if (editorPanel) editorPanel.style.display = '';
+    if (headerEl) headerEl.style.display = '';
+    if (libraryModal) libraryModal.style.display = '';
+    editableInputs.forEach((el, i) => {
+      const inputEl = el as HTMLInputElement | HTMLTextAreaElement;
+      (el as HTMLElement).style.display = '';
+      if (i < originalInputValues.length) {
+        inputEl.value = originalInputValues[i].value;
+      }
+    });
+    if (!wasExporting) {
+      element.classList.remove('is-exporting');
+    }
   }
 }
 
 export async function printInvoice(
   element?: HTMLElement | null,
   options?: { filename?: string; onProgress?: (status: string) => void }
-): Promise<{ method: 'native' | 'pdf_download'; error?: string }> {
-  const isInIframe = window.self !== window.top;
-  const usePdfFallback = isMobileBrowser() || isInIframe;
-
-  if (!usePdfFallback && element) {
-    try {
-      window.print();
-      return { method: 'native' };
-    } catch (error) {
-      console.warn('Native window.print() failed:', error);
-    }
+): Promise<{ method: 'pdf_download'; error?: string; success: boolean }> {
+  if (!element) {
+    return { method: 'pdf_download', error: 'Invoice preview is unavailable.', success: false };
   }
 
-  if (element) {
-    try {
-      await generateInvoicePDF(element, {
-        filename: options?.filename || 'Yaman_Mart_Invoice.pdf',
-        onProgress: options?.onProgress,
-      });
-      return { method: 'pdf_download' };
-    } catch (error) {
-      const message = getErrorMessage(error);
-      console.error('Print-ready PDF generation failed:', error);
-      return { method: 'pdf_download', error: message };
-    }
+  try {
+    await generateInvoicePDF(element, {
+      filename: options?.filename || 'Yaman_Mart_Invoice.pdf',
+      onProgress: options?.onProgress,
+    });
+    return { method: 'pdf_download', success: true };
+  } catch (error) {
+    const message = getErrorMessage(error);
+    console.error('Print-ready PDF generation failed:', error);
+    return { method: 'pdf_download', error: message, success: false };
   }
-
-  return {
-    method: 'native',
-    error: 'Browser printing is unavailable and no invoice element was provided for PDF fallback.',
-  };
 }

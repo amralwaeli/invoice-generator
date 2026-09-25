@@ -404,7 +404,7 @@ export default function App() {
     try {
       setIsExporting(true);
       setExportStatus('Preparing your PDF…');
-      await generateInvoicePDF(previewRef.current, {
+      const result = await generateInvoicePDF(previewRef.current, {
         filename: filenameBase(invoice) + '.pdf',
         onProgress: setExportStatus,
       });
@@ -429,7 +429,11 @@ export default function App() {
         filename: filenameBase(invoice) + '.pdf',
         onProgress: setExportStatus,
       });
-      showToast('success', result.method === 'native' ? 'Print dialog opened.' : 'Print-ready PDF downloaded.');
+      if (result.success) {
+        showToast('success', 'Print-ready PDF downloaded — open and print from your PDF viewer.');
+      } else {
+        showToast('error', result.error || 'Could not create the PDF for printing.');
+      }
     } catch (error) {
       console.error('Print failed:', error);
       showToast('error', 'Could not prepare the invoice for printing.');
