@@ -7,7 +7,7 @@ export interface PDFExportOptions {
 }
 
 const PDF_EXTENSION = '.pdf';
-const PDF_MARGIN_MM = 8;
+const PDF_MARGIN_MM = 4;
 const A4_WIDTH_MM = 210;
 const A4_HEIGHT_MM = 297;
 const EXPORT_SCALE = 3;
