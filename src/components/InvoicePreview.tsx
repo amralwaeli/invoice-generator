@@ -73,7 +73,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
               </div>
           </div>
           <div className="text-left sm:text-right">
-            <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 ring-1 ring-slate-200">
+            <div className="invoice-title-label inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 ring-1 ring-slate-200" dir="ltr">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-700">Invoice</span>
             </div>
             <h2 className="mt-1 text-2xl sm:text-3xl font-black text-slate-900">{invoice.invoiceNumber || '—'}</h2>
@@ -104,7 +104,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
             )}
           </div>
           <div className="flex items-end justify-end">
-            <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold border ${statusColors[status]}`}>
+            <div className={`invoice-status inline-flex items-center gap-2 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold border ${statusColors[status]}`}>
               <span className="h-2 w-2 rounded-full bg-current" />
               {statusLabels[status]}
             </div>
@@ -116,7 +116,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
       <div className="invoice-items px-4 sm:px-8 pb-3 sm:pb-4">
         <div className="overflow-hidden rounded-xl ring-1 ring-slate-200">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[500px]">
+            <table className="w-full min-w-[500px]" dir="ltr">
               <thead>
                 <tr className="bg-slate-700 text-white">
                   <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider">#</th>

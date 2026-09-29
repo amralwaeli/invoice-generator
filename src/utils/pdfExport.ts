@@ -241,6 +241,20 @@ export async function generateInvoicePDF(
         const compactStyles = doc.createElement('style');
         compactStyles.textContent = `
           #printable-invoice.pdf-export-mode > .invoice-preview-content { min-height: 0 !important; }
+          #printable-invoice.pdf-export-mode .invoice-title-label { display: inline-flex !important; visibility: visible !important; opacity: 1 !important; direction: ltr !important; unicode-bidi: isolate !important; color: #334155 !important; }
+          #printable-invoice.pdf-export-mode .invoice-bill-to > .grid { grid-template-columns: minmax(0, 1fr) !important; }
+          #printable-invoice.pdf-export-mode .invoice-status { display: none !important; }
+          #printable-invoice.pdf-export-mode .invoice-items,
+          #printable-invoice.pdf-export-mode .invoice-items table,
+          #printable-invoice.pdf-export-mode .invoice-items th,
+          #printable-invoice.pdf-export-mode .invoice-items td { direction: ltr !important; unicode-bidi: isolate !important; }
+          #printable-invoice.pdf-export-mode .invoice-items th:nth-child(3),
+          #printable-invoice.pdf-export-mode .invoice-items td:nth-child(3) { text-align: center !important; }
+          #printable-invoice.pdf-export-mode .invoice-items th:nth-child(4),
+          #printable-invoice.pdf-export-mode .invoice-items th:nth-child(5),
+          #printable-invoice.pdf-export-mode .invoice-items td:nth-child(4),
+          #printable-invoice.pdf-export-mode .invoice-items td:nth-child(5) { text-align: right !important; direction: ltr !important; unicode-bidi: isolate !important; }
+          #printable-invoice.pdf-export-mode .invoice-summary .font-mono { direction: ltr !important; unicode-bidi: isolate !important; }
           #printable-invoice.pdf-export-mode .invoice-header { padding-top: 10px !important; padding-bottom: 10px !important; }
           #printable-invoice.pdf-export-mode .invoice-header img { max-height: 160px !important; }
           #printable-invoice.pdf-export-mode .invoice-bill-to { padding-top: 10px !important; padding-bottom: 10px !important; }
