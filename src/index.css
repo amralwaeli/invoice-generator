@@ -117,6 +117,7 @@
     padding: 0 !important;
     width: 100% !important;
     height: auto !important;
+    overflow: visible !important;
   }
 
   /* Hide all app UI */
@@ -126,6 +127,7 @@
 
   /* Show only the invoice document */
   main {
+    display: block !important;
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
@@ -137,13 +139,26 @@
     box-shadow: none !important;
     border: none !important;
     margin: 0 auto !important;
-    padding: 10mm 12mm !important;
+    padding: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     min-height: 0 !important;
     background: #ffffff !important;
     color: #0f172a !important;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+    break-inside: auto;
+    overflow: visible !important;
+  }
+
+  #printable-invoice table,
+  #printable-invoice tr,
+  #printable-invoice .rounded-xl {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .overflow-x-auto {
+    overflow: visible !important;
   }
 
   #printable-invoice * {
@@ -161,6 +176,6 @@
 
   @page {
     size: A4 portrait;
-    margin: 12mm;
+    margin: 10mm;
   }
 }

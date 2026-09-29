@@ -430,7 +430,7 @@ export default function App() {
         onProgress: setExportStatus,
       });
       if (result.success) {
-        showToast('success', 'Print-ready PDF downloaded — open and print from your PDF viewer.');
+        showToast('success', 'Print dialog opened. Choose a printer or Save as PDF.');
       } else {
         showToast('error', result.error || 'Could not create the PDF for printing.');
       }

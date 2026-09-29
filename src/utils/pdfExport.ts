@@ -225,7 +225,16 @@ export async function generateInvoicePDF(
     }
 
     reportProgress(options, 'Downloading PDF file...');
-    pdf.save(sanitizeFilename(options.filename));
+    const blob = pdf.output('blob');
+    const downloadUrl = URL.createObjectURL(blob);
+    const downloadLink = document.createElement('a');
+    downloadLink.href = downloadUrl;
+    downloadLink.download = sanitizeFilename(options.filename);
+    downloadLink.style.display = 'none';
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+    window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 60_000);
     isComplete = true;
   } catch (error) {
     console.error('Client-side PDF generation failed:', error);
@@ -255,20 +264,20 @@ export async function generateInvoicePDF(
 export async function printInvoice(
   element?: HTMLElement | null,
   options?: { filename?: string; onProgress?: (status: string) => void }
-): Promise<{ method: 'pdf_download'; error?: string; success: boolean }> {
+): Promise<{ method: 'print_dialog'; error?: string; success: boolean }> {
   if (!element) {
-    return { method: 'pdf_download', error: 'Invoice preview is unavailable.', success: false };
+    return { method: 'print_dialog', error: 'Invoice preview is unavailable.', success: false };
   }
 
+  // Native printing keeps text and tables crisp and lets the user choose a
+  // physical printer or “Save as PDF” in the browser's print dialog.
   try {
-    await generateInvoicePDF(element, {
-      filename: options?.filename || 'Yaman_Mart_Invoice.pdf',
-      onProgress: options?.onProgress,
-    });
-    return { method: 'pdf_download', success: true };
+    options?.onProgress?.('Opening print dialog...');
+    window.print();
+    return { method: 'print_dialog', success: true };
   } catch (error) {
     const message = getErrorMessage(error);
-    console.error('Print-ready PDF generation failed:', error);
-    return { method: 'pdf_download', error: message, success: false };
+    console.error('Could not open the print dialog:', error);
+    return { method: 'print_dialog', error: message, success: false };
   }
 }
