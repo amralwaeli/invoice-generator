@@ -241,7 +241,7 @@ export async function generateInvoicePDF(
         const compactStyles = doc.createElement('style');
         compactStyles.textContent = `
           #printable-invoice.pdf-export-mode > .invoice-preview-content { min-height: 0 !important; }
-          #printable-invoice.pdf-export-mode .invoice-title-label { display: inline-flex !important; visibility: visible !important; opacity: 1 !important; direction: ltr !important; unicode-bidi: isolate !important; color: #334155 !important; }
+          #printable-invoice.pdf-export-mode .invoice-title-label { display: inline-flex !important; visibility: visible !important; opacity: 1 !important; direction: ltr !important; unicode-bidi: isolate !important; color: #334155 !important; font-size: 12px !important; font-weight: 700 !important; line-height: 1.25 !important; }
           #printable-invoice.pdf-export-mode .invoice-bill-to > .grid { grid-template-columns: minmax(0, 1fr) !important; }
           #printable-invoice.pdf-export-mode .invoice-status { display: none !important; }
           #printable-invoice.pdf-export-mode .invoice-items,
@@ -260,7 +260,7 @@ export async function generateInvoicePDF(
           #printable-invoice.pdf-export-mode .invoice-bill-to { padding-top: 10px !important; padding-bottom: 10px !important; }
           #printable-invoice.pdf-export-mode .invoice-items { padding-bottom: 10px !important; }
           #printable-invoice.pdf-export-mode .invoice-items th,
-          #printable-invoice.pdf-export-mode .invoice-items td { padding-top: 6px !important; padding-bottom: 6px !important; }
+          #printable-invoice.pdf-export-mode .invoice-items td { padding-top: 11px !important; padding-bottom: 13px !important; line-height: 1.5 !important; }
           #printable-invoice.pdf-export-mode .invoice-summary { padding-bottom: 10px !important; }
           #printable-invoice.pdf-export-mode .invoice-footer { margin-top: 8px !important; padding-top: 10px !important; padding-bottom: 10px !important; }
         `;

@@ -73,8 +73,8 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
               </div>
           </div>
           <div className="text-left sm:text-right">
-            <div className="invoice-title-label inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 ring-1 ring-slate-200" dir="ltr">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-700">Invoice</span>
+            <div className="invoice-title-label inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 ring-1 ring-slate-200" dir="ltr">
+              Invoice
             </div>
             <h2 className="mt-1 text-2xl sm:text-3xl font-black text-slate-900">{invoice.invoiceNumber || '—'}</h2>
             <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs sm:justify-end">
