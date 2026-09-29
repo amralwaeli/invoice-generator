@@ -11,6 +11,7 @@ const PDF_MARGIN_MM = 12;
 const A4_WIDTH_MM = 210;
 const A4_HEIGHT_MM = 297;
 const EXPORT_SCALE = 3;
+const PDF_CAPTURE_WIDTH = 794;
 const PDF_COLOR_PROPERTIES = [
   'color',
   'background-color',
@@ -207,6 +208,7 @@ export async function generateInvoicePDF(
 
   let canvas: HTMLCanvasElement | null = null;
   let isComplete = false;
+  let safeBreakOffsets: number[] = [];
 
   try {
     reportProgress(options, 'Preparing document...');
@@ -219,8 +221,8 @@ export async function generateInvoicePDF(
       allowTaint: false,
       logging: false,
       backgroundColor: '#ffffff',
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight,
+      windowWidth: PDF_CAPTURE_WIDTH,
+      windowHeight: Math.max(PDF_CAPTURE_WIDTH * 1.5, element.scrollHeight),
       scrollX: 0,
       scrollY: 0,
       onclone: (doc) => {
@@ -228,7 +230,31 @@ export async function generateInvoicePDF(
         if (cloneEditor) cloneEditor.style.display = 'none';
         const cloneHeader = doc.querySelector('header') as HTMLElement | null;
         if (cloneHeader) cloneHeader.style.display = 'none';
+        const cloneInvoice = doc.querySelector<HTMLElement>('#printable-invoice');
+        if (cloneInvoice) {
+          cloneInvoice.classList.add('pdf-export-mode');
+          cloneInvoice.style.setProperty('width', `${PDF_CAPTURE_WIDTH}px`, 'important');
+          cloneInvoice.style.setProperty('min-width', `${PDF_CAPTURE_WIDTH}px`, 'important');
+          cloneInvoice.style.setProperty('max-width', `${PDF_CAPTURE_WIDTH}px`, 'important');
+          cloneInvoice.style.setProperty('box-sizing', 'border-box', 'important');
+        }
+        const compactStyles = doc.createElement('style');
+        compactStyles.textContent = `
+          #printable-invoice.pdf-export-mode > .invoice-preview-content { min-height: 0 !important; }
+          #printable-invoice.pdf-export-mode .invoice-header { padding-top: 10px !important; padding-bottom: 10px !important; }
+          #printable-invoice.pdf-export-mode .invoice-header img { max-height: 160px !important; }
+          #printable-invoice.pdf-export-mode .invoice-bill-to { padding-top: 10px !important; padding-bottom: 10px !important; }
+          #printable-invoice.pdf-export-mode .invoice-items { padding-bottom: 10px !important; }
+          #printable-invoice.pdf-export-mode .invoice-items th,
+          #printable-invoice.pdf-export-mode .invoice-items td { padding-top: 6px !important; padding-bottom: 6px !important; }
+          #printable-invoice.pdf-export-mode .invoice-summary { padding-bottom: 10px !important; }
+          #printable-invoice.pdf-export-mode .invoice-footer { margin-top: 8px !important; padding-top: 10px !important; padding-bottom: 10px !important; }
+        `;
+        doc.head.appendChild(compactStyles);
         normalizePdfColors(doc);
+        if (cloneInvoice) {
+          safeBreakOffsets = collectSafeBreakOffsets(cloneInvoice);
+        }
       },
     });
 
@@ -243,12 +269,15 @@ export async function generateInvoicePDF(
     const contentWidth = A4_WIDTH_MM - PDF_MARGIN_MM * 2;
     const contentHeight = A4_HEIGHT_MM - PDF_MARGIN_MM * 2;
     const maxPageHeightPx = Math.floor((contentHeight * canvas.width) / contentWidth);
-    const cssToCanvasScale = canvas.width / Math.max(1, element.scrollWidth);
     const canvasHeight = canvas.height;
-    const canvasBreakOffsets = collectSafeBreakOffsets(element)
+    const cssToCanvasScale = canvas.width / PDF_CAPTURE_WIDTH;
+    const canvasBreakOffsets = safeBreakOffsets
       .map((offset) => Math.round(offset * cssToCanvasScale))
       .filter((offset) => offset > 0 && offset < canvasHeight);
-    const slices = planPageSlices(canvasHeight, maxPageHeightPx, canvasBreakOffsets);
+    const shouldFitOnePage = canvasHeight <= maxPageHeightPx * 1.15;
+    const slices = shouldFitOnePage
+      ? [{ top: 0, height: canvasHeight }]
+      : planPageSlices(canvasHeight, maxPageHeightPx, canvasBreakOffsets);
 
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
 
@@ -258,8 +287,12 @@ export async function generateInvoicePDF(
       const pageCanvas = createCanvasSlice(canvas, slicePlan.top, slicePlan.height);
       try {
         const imageData = pageCanvas.toDataURL('image/jpeg', 0.96);
-        const pageHeight = (slicePlan.height * contentWidth) / canvas.width;
-        pdf.addImage(imageData, 'JPEG', PDF_MARGIN_MM, PDF_MARGIN_MM, contentWidth, pageHeight);
+        const fitScale = Math.min(contentWidth / canvas.width, contentHeight / slicePlan.height);
+        const pageWidth = canvas.width * fitScale;
+        const pageHeight = slicePlan.height * fitScale;
+        const pageX = (A4_WIDTH_MM - pageWidth) / 2;
+        const pageY = Math.max(PDF_MARGIN_MM, (A4_HEIGHT_MM - pageHeight) / 2);
+        pdf.addImage(imageData, 'JPEG', pageX, pageY, pageWidth, pageHeight);
       } finally {
         pageCanvas.width = 1;
         pageCanvas.height = 1;

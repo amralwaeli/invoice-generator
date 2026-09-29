@@ -27,9 +27,9 @@ function formatDate(value: string): string {
 
 export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals }) => {
   const statusColors = {
-    paid: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-    overdue: 'bg-rose-100 text-rose-800 border-rose-200',
-    sent: 'bg-amber-100 text-amber-800 border-amber-200',
+    paid: 'bg-slate-100 text-slate-700 border-slate-200',
+    overdue: 'bg-slate-100 text-slate-700 border-slate-200',
+    sent: 'bg-slate-100 text-slate-700 border-slate-200',
     draft: 'bg-slate-100 text-slate-700 border-slate-200',
   };
 
@@ -47,46 +47,42 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
       : invoice.status;
 
   return (
-    <div className="flex min-h-[1024px] flex-col bg-white" lang="en" dir="ltr">
+    <div className="invoice-preview-content flex min-h-[1024px] flex-col bg-white" lang="en" dir="ltr">
       {/* Header */}
-      <div className="relative border-b-4 border-emerald-600 px-6 sm:px-8 pt-6 sm:pt-8 pb-6">
-          <div className="flex items-start justify-between gap-4">
-          <div className="flex min-w-0 flex-col items-start gap-3">
-            <div className="h-16 w-16 sm:h-20 sm:w-20 overflow-hidden rounded-lg bg-emerald-50 ring-2 ring-emerald-100">
-              <img
-                src={`${import.meta.env.BASE_URL}yaman_mart_logo.jpg`}
-                alt="Store logo"
-                className="h-full w-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            </div>
-            <div className="text-left">
+      <div className="invoice-header relative border-b-2 border-slate-300 px-5 sm:px-8 pt-4 pb-4">
+        <img
+          src={`${import.meta.env.BASE_URL}yaman_mart_logo.jpg`}
+          alt="Yaman Mart logo"
+          className="mx-auto block h-auto max-h-[190px] w-full object-contain object-center"
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
+        />
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+          <div className="text-left">
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{invoice.shopName}</h1>
               {invoice.companyReg && (
-                <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-700">
                   Reg. No: {invoice.companyReg}
                 </p>
               )}
-              <div className="mt-2 sm:mt-3 space-y-0.5 text-xs text-slate-600">
+            <div className="mt-2 sm:mt-3 space-y-0.5 text-xs text-slate-600">
                 <p>{invoice.shopAddress}</p>
                 <p>{invoice.shopEmail}</p>
                 <p>{invoice.shopPhone}</p>
               </div>
-            </div>
           </div>
-          <div className="text-right shrink-0">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 sm:px-4 sm:py-2 ring-1 ring-emerald-200">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Invoice</span>
+          <div className="text-left sm:text-right">
+            <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 ring-1 ring-slate-200">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700">Invoice</span>
             </div>
-            <h2 className="mt-2 sm:mt-3 text-3xl sm:text-4xl font-black text-slate-900">{invoice.invoiceNumber || '—'}</h2>
-            <div className="mt-2 sm:mt-4 space-y-0.5 text-xs sm:text-sm">
-              <div className="flex items-center justify-end gap-2">
+            <h2 className="mt-1 text-2xl sm:text-3xl font-black text-slate-900">{invoice.invoiceNumber || '—'}</h2>
+            <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs sm:justify-end">
+              <div className="flex items-center gap-1.5">
                 <span className="text-slate-500">Issue date:</span>
                 <span className="font-semibold text-slate-900">{formatDate(invoice.date)}</span>
               </div>
-              <div className="flex items-center justify-end gap-2">
+              <div className="flex items-center gap-1.5">
                 <span className="text-slate-500">Due date:</span>
                 <span className="font-semibold text-slate-900">{formatDate(invoice.dueDate)}</span>
               </div>
@@ -96,9 +92,9 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
       </div>
 
       {/* Bill To */}
-      <div className="px-4 sm:px-8 py-4 sm:py-6">
+      <div className="invoice-bill-to px-4 sm:px-8 py-3 sm:py-4">
         <div className="grid grid-cols-2 gap-4 sm:gap-8">
-          <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200">
+          <div className="rounded-lg bg-slate-50 p-3 sm:p-4 ring-1 ring-slate-200">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Bill to</h3>
             <p className="mt-2 sm:mt-3 text-base sm:text-lg font-bold text-slate-900">
               {invoice.customerName.trim() || 'Unregistered customer'}
@@ -117,12 +113,12 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
       </div>
 
       {/* Items Table */}
-      <div className="px-4 sm:px-8 pb-4 sm:pb-6">
+      <div className="invoice-items px-4 sm:px-8 pb-3 sm:pb-4">
         <div className="overflow-hidden rounded-xl ring-1 ring-slate-200">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[500px]">
               <thead>
-                <tr className="bg-slate-900 text-white">
+                <tr className="bg-slate-700 text-white">
                   <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider">#</th>
                   <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider">Description</th>
                   <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs font-bold uppercase tracking-wider">Quantity</th>
@@ -133,7 +129,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
               <tbody className="divide-y divide-slate-200 bg-white">
                 {invoice.items.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-3 sm:px-6 py-8 text-center text-sm text-slate-500">
+                    <td colSpan={5} className="px-3 sm:px-6 py-5 text-center text-sm text-slate-500">
                       No items yet
                     </td>
                   </tr>
@@ -168,13 +164,13 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
       </div>
 
       {/* Totals & Payment */}
-      <div className="grid grid-cols-1 sm:grid-cols-[1fr_320px] gap-4 sm:gap-8 px-4 sm:px-8 pb-4 sm:pb-8">
-        <div className="space-y-4 sm:space-y-6">
-          <div className="rounded-xl bg-emerald-50 p-4 sm:p-5 ring-1 ring-emerald-200">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+      <div className="invoice-summary grid grid-cols-1 sm:grid-cols-[1fr_320px] gap-3 sm:gap-5 px-4 sm:px-8 pb-3 sm:pb-4">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="rounded-lg bg-slate-50 p-3 sm:p-4 ring-1 ring-slate-200">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Payment information
             </h3>
-            <div className="mt-3 sm:mt-4 space-y-2 sm:space-y-3 text-sm">
+            <div className="mt-2 space-y-1.5 text-sm">
               <div className="flex justify-between">
                 <span className="text-slate-600">Bank</span>
                 <span className="font-semibold text-slate-900">{invoice.bankName}</span>
@@ -185,17 +181,17 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-600">Account number</span>
-                <span className="font-mono font-bold text-emerald-700">{invoice.accountNumber}</span>
+                <span className="font-mono font-bold text-slate-900">{invoice.accountNumber}</span>
               </div>
             </div>
             {invoice.notes && (
-              <p className="mt-3 sm:mt-4 border-t border-emerald-200 pt-2 sm:pt-3 text-xs leading-relaxed text-emerald-900">
+              <p className="mt-2 border-t border-slate-200 pt-2 text-xs leading-relaxed text-slate-600">
                 {invoice.notes}
               </p>
             )}
           </div>
           {invoice.remarks && (
-            <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200">
+            <div className="rounded-lg bg-slate-50 p-3 sm:p-4 ring-1 ring-slate-200">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 Terms and conditions
               </h3>
@@ -204,15 +200,15 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
           )}
         </div>
 
-        <div className="rounded-xl bg-slate-900 p-4 sm:p-6 text-white">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Order summary</h3>
-          <div className="mt-3 sm:mt-5 space-y-2 sm:space-y-3 text-sm">
-            <div className="flex justify-between text-slate-300">
+        <div className="rounded-lg bg-slate-50 p-3 sm:p-4 text-slate-800 ring-1 ring-slate-200">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Order summary</h3>
+          <div className="mt-2 space-y-1.5 text-sm">
+            <div className="flex justify-between text-slate-600">
               <span>Subtotal ({totals.quantity} items)</span>
               <span className="font-mono font-semibold">{formatMoney(totals.subtotal)}</span>
             </div>
             {totals.discountAmount > 0 && (
-              <div className="flex justify-between text-emerald-400">
+              <div className="flex justify-between text-slate-700">
                 <span>
                   Discount {invoice.discountType === 'percentage' && Number(invoice.discountValue) > 0 && `(${invoice.discountValue}%)`}
                 </span>
@@ -222,7 +218,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
               </div>
             )}
             {totals.taxAmount > 0 && (
-              <div className="flex justify-between text-slate-300">
+              <div className="flex justify-between text-slate-600">
                 <span>
                   {invoice.taxName || 'Tax'}{' '}
                   {invoice.taxType === 'percentage' && Number(invoice.taxRate) > 0 && `(${invoice.taxRate}%)`}
@@ -233,16 +229,16 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
               </div>
             )}
           </div>
-          <div className="mt-4 sm:mt-5 border-t-2 border-emerald-500 pt-4 sm:pt-5">
+          <div className="mt-3 border-t border-slate-300 pt-3">
             <div className="flex justify-between items-end">
               <div>
-                <p className="text-xs text-slate-400">Total due</p>
-                <p className="mt-1 text-2xl sm:text-3xl font-black text-emerald-400">
+                <p className="text-xs text-slate-500">Total due</p>
+                <p className="mt-1 text-2xl font-black text-slate-900">
                   {formatMoney(totals.total)}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-slate-400">Currency</p>
+                <p className="text-xs text-slate-500">Currency</p>
                 <p className="font-bold">RM</p>
               </div>
             </div>
@@ -251,7 +247,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
       </div>
 
       {/* Footer */}
-      <div className="mt-auto border-t border-slate-200 px-4 sm:px-8 py-4 sm:py-6">
+      <div className="invoice-footer mt-auto border-t border-slate-200 px-4 sm:px-8 py-3 sm:py-4">
         <div className="flex items-center justify-between text-xs text-slate-500">
           <div>
             <p className="font-semibold text-slate-700">Thank you for your business!</p>
