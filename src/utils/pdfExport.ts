@@ -11,6 +11,19 @@ const PDF_MARGIN_MM = 12;
 const A4_WIDTH_MM = 210;
 const A4_HEIGHT_MM = 297;
 const EXPORT_SCALE = 3;
+const PDF_COLOR_PROPERTIES = [
+  'color',
+  'background-color',
+  'border-top-color',
+  'border-right-color',
+  'border-bottom-color',
+  'border-left-color',
+  'outline-color',
+  'text-decoration-color',
+  'column-rule-color',
+  'fill',
+  'stroke',
+];
 
 function reportProgress(options: PDFExportOptions, status: string) {
   try { options.onProgress?.(status); } catch { /* noop */ }
@@ -18,6 +31,34 @@ function reportProgress(options: PDFExportOptions, status: string) {
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Unknown error';
+}
+
+function normalizePdfColors(doc: Document): void {
+  const view = doc.defaultView;
+  const colorContext = doc.createElement('canvas').getContext('2d');
+  if (!view || !colorContext) return;
+  colorContext.canvas.width = 1;
+  colorContext.canvas.height = 1;
+
+  const elements = doc.querySelectorAll<HTMLElement>('#printable-invoice, #printable-invoice *');
+  elements.forEach((element) => {
+    const computed = view.getComputedStyle(element);
+    PDF_COLOR_PROPERTIES.forEach((property) => {
+      const value = computed.getPropertyValue(property);
+      if (!value) return;
+      colorContext.fillStyle = '#000000';
+      colorContext.fillStyle = value;
+      colorContext.clearRect(0, 0, 1, 1);
+      colorContext.fillRect(0, 0, 1, 1);
+      const [red, green, blue, alpha] = colorContext.getImageData(0, 0, 1, 1).data;
+      element.style.setProperty(property, `rgba(${red}, ${green}, ${blue}, ${alpha / 255})`);
+    });
+
+    // Tailwind 4 uses color-mix() in ring and shadow declarations. html2canvas
+    // 1.x cannot parse those colors, and shadows are not needed in the export.
+    element.style.setProperty('box-shadow', 'none', 'important');
+    element.style.setProperty('text-shadow', 'none', 'important');
+  });
 }
 
 function sanitizeFilename(filename?: string): string {
@@ -187,6 +228,7 @@ export async function generateInvoicePDF(
         if (cloneEditor) cloneEditor.style.display = 'none';
         const cloneHeader = doc.querySelector('header') as HTMLElement | null;
         if (cloneHeader) cloneHeader.style.display = 'none';
+        normalizePdfColors(doc);
       },
     });
 

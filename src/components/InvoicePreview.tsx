@@ -34,10 +34,10 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
   };
 
   const statusLabels = {
-    paid: 'مدفوعة',
-    overdue: 'متأخرة',
-    sent: 'تستحق الدفع',
-    draft: 'مسودة',
+    paid: 'Paid',
+    overdue: 'Overdue',
+    sent: 'Payment due',
+    draft: 'Draft',
   };
 
   const status = invoice.status === 'paid'
@@ -47,14 +47,14 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
       : invoice.status;
 
   return (
-    <div className="flex min-h-[1024px] flex-col bg-white">
+    <div className="flex min-h-[1024px] flex-col bg-white" lang="en" dir="ltr">
       {/* Header */}
       <div className="relative border-b-4 border-emerald-600 px-6 sm:px-8 pt-6 sm:pt-8 pb-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="h-16 sm:h-20 w-16 sm:w-20 overflow-hidden rounded-lg bg-emerald-50 ring-2 ring-emerald-100">
+          <div className="flex items-start justify-between gap-4">
+          <div className="flex min-w-0 flex-col items-start gap-3">
+            <div className="h-16 w-16 sm:h-20 sm:w-20 overflow-hidden rounded-lg bg-emerald-50 ring-2 ring-emerald-100">
               <img
-                src="/yaman_mart_banner.jpg"
+                src={`${import.meta.env.BASE_URL}yaman_mart_logo.jpg`}
                 alt="Store logo"
                 className="h-full w-full object-cover"
                 onError={(e) => {
@@ -62,7 +62,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
                 }}
               />
             </div>
-            <div>
+            <div className="text-left">
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{invoice.shopName}</h1>
               {invoice.companyReg && (
                 <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-emerald-700">
@@ -83,11 +83,11 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
             <h2 className="mt-2 sm:mt-3 text-3xl sm:text-4xl font-black text-slate-900">{invoice.invoiceNumber || '—'}</h2>
             <div className="mt-2 sm:mt-4 space-y-0.5 text-xs sm:text-sm">
               <div className="flex items-center justify-end gap-2">
-                <span className="text-slate-500">تاريخ الإصدار:</span>
+                <span className="text-slate-500">Issue date:</span>
                 <span className="font-semibold text-slate-900">{formatDate(invoice.date)}</span>
               </div>
               <div className="flex items-center justify-end gap-2">
-                <span className="text-slate-500">تاريخ الاستحقاق:</span>
+                <span className="text-slate-500">Due date:</span>
                 <span className="font-semibold text-slate-900">{formatDate(invoice.dueDate)}</span>
               </div>
             </div>
@@ -99,9 +99,9 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
       <div className="px-4 sm:px-8 py-4 sm:py-6">
         <div className="grid grid-cols-2 gap-4 sm:gap-8">
           <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">العميل</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Bill to</h3>
             <p className="mt-2 sm:mt-3 text-base sm:text-lg font-bold text-slate-900">
-              {invoice.customerName.trim() || 'عميل غير مسجل'}
+              {invoice.customerName.trim() || 'Unregistered customer'}
             </p>
             {invoice.customerPhone && (
               <p className="mt-1 text-sm text-slate-600">{invoice.customerPhone}</p>
@@ -124,17 +124,17 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
               <thead>
                 <tr className="bg-slate-900 text-white">
                   <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider">#</th>
-                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider">وصف</th>
-                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs font-bold uppercase tracking-wider">الكمية</th>
-                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs font-bold uppercase tracking-wider">السعر</th>
-                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs font-bold uppercase tracking-wider">المبلغ</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold uppercase tracking-wider">Description</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs font-bold uppercase tracking-wider">Quantity</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs font-bold uppercase tracking-wider">Unit price</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs font-bold uppercase tracking-wider">Amount</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 bg-white">
                 {invoice.items.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-3 sm:px-6 py-8 text-center text-sm text-slate-500">
-                      لا توجد عناصر بعد
+                      No items yet
                     </td>
                   </tr>
                 ) : (
@@ -146,7 +146,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
                           {String(index + 1).padStart(2, '0')}
                         </td>
                         <td className="px-3 sm:px-6 py-3 sm:py-4 text-sm font-semibold text-slate-900 max-w-[200px] sm:max-w-none">
-                          {item.description.trim() || 'وصف العنصر'}
+                          {item.description.trim() || 'Item description'}
                         </td>
                         <td className="px-3 sm:px-6 py-3 sm:py-4 text-center text-sm font-semibold text-slate-700">
                           {numericValue(item.quantity)}
@@ -172,19 +172,19 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
         <div className="space-y-4 sm:space-y-6">
           <div className="rounded-xl bg-emerald-50 p-4 sm:p-5 ring-1 ring-emerald-200">
             <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-              معلومات الدفع
+              Payment information
             </h3>
             <div className="mt-3 sm:mt-4 space-y-2 sm:space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-slate-600">اسم البنك</span>
+                <span className="text-slate-600">Bank</span>
                 <span className="font-semibold text-slate-900">{invoice.bankName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-600">اسم الحساب</span>
+                <span className="text-slate-600">Account name</span>
                 <span className="font-semibold text-slate-900">{invoice.accountName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-600">رقم الحساب</span>
+                <span className="text-slate-600">Account number</span>
                 <span className="font-mono font-bold text-emerald-700">{invoice.accountNumber}</span>
               </div>
             </div>
@@ -197,7 +197,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
           {invoice.remarks && (
             <div className="rounded-xl bg-slate-50 p-4 sm:p-5 ring-1 ring-slate-200">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                الشروط والأحكام
+                Terms and conditions
               </h3>
               <p className="mt-2 sm:mt-3 text-sm leading-relaxed text-slate-700">{invoice.remarks}</p>
             </div>
@@ -205,16 +205,16 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
         </div>
 
         <div className="rounded-xl bg-slate-900 p-4 sm:p-6 text-white">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">مجموع الطلب</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Order summary</h3>
           <div className="mt-3 sm:mt-5 space-y-2 sm:space-y-3 text-sm">
             <div className="flex justify-between text-slate-300">
-              <span>المجموع الجزئي ({totals.quantity} عناصر)</span>
+              <span>Subtotal ({totals.quantity} items)</span>
               <span className="font-mono font-semibold">{formatMoney(totals.subtotal)}</span>
             </div>
             {totals.discountAmount > 0 && (
               <div className="flex justify-between text-emerald-400">
                 <span>
-                  خصم {invoice.discountType === 'percentage' && Number(invoice.discountValue) > 0 && `(${invoice.discountValue}%)`}
+                  Discount {invoice.discountType === 'percentage' && Number(invoice.discountValue) > 0 && `(${invoice.discountValue}%)`}
                 </span>
                 <span className="font-mono font-semibold">
                   − {formatMoney(totals.discountAmount)}
@@ -224,7 +224,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
             {totals.taxAmount > 0 && (
               <div className="flex justify-between text-slate-300">
                 <span>
-                  {invoice.taxName || 'ضريبة'}{' '}
+                  {invoice.taxName || 'Tax'}{' '}
                   {invoice.taxType === 'percentage' && Number(invoice.taxRate) > 0 && `(${invoice.taxRate}%)`}
                 </span>
                 <span className="font-mono font-semibold">
@@ -236,13 +236,13 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
           <div className="mt-4 sm:mt-5 border-t-2 border-emerald-500 pt-4 sm:pt-5">
             <div className="flex justify-between items-end">
               <div>
-                <p className="text-xs text-slate-400">المبلغ الإجمالي المستحق</p>
+                <p className="text-xs text-slate-400">Total due</p>
                 <p className="mt-1 text-2xl sm:text-3xl font-black text-emerald-400">
                   {formatMoney(totals.total)}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-slate-400">العملة</p>
+                <p className="text-xs text-slate-400">Currency</p>
                 <p className="font-bold">RM</p>
               </div>
             </div>
@@ -254,8 +254,8 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals 
       <div className="mt-auto border-t border-slate-200 px-4 sm:px-8 py-4 sm:py-6">
         <div className="flex items-center justify-between text-xs text-slate-500">
           <div>
-            <p className="font-semibold text-slate-700">شكراً لتجارتك معنا!</p>
-            <p className="mt-0.5">يرجى الدفع خلال الموعد النهائي لتجنب الغرامات المتأخرة.</p>
+            <p className="font-semibold text-slate-700">Thank you for your business!</p>
+            <p className="mt-0.5">Please pay by the due date to avoid late fees.</p>
           </div>
           <div className="text-right">
             <p className="font-semibold text-slate-700">{invoice.shopName}</p>
